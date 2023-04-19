@@ -24,4 +24,13 @@ const output = execSync(
 );
 console.log("Output was:", output);
 
+
+const recovery = execSync(
+    "mysql -u root -p siddata < ./Tests/mydatabase_backup.sql",
+    { encoding: "utf-8" }
+);
+console.log("Output was:", recovery);
+
+
+
 connection.end();
