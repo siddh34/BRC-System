@@ -152,6 +152,8 @@ class UI(QMainWindow):
 
             print(result.stderr)
 
+            print("Done!")
+
 
 if __name__ == '__main__':
     # initialize the app
