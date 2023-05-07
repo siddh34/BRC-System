@@ -1,21 +1,29 @@
-import React from 'react'
+import React from 'react';
+// import "./Services/Backup.js";
+
 
 export default function BRC() {
-  return (
+
+    let backup = () => {
+        let saveOn = Document.getElementsByID("saving_on");
+        if(saveOn.selectedIndex === 0){
+            
+        }
+    };
+
+    return (
     <>
-      <div>BRC</div>
-      <div style={{backgroundColor: "rgb(199, 199, 199)",margin: "6% 15% 6% 15%",padding: "3.5%", alignItems: "center"}}>
+        <div style={{backgroundColor: "rgb(199, 199, 199)",margin: "6% 15% 6% 15%",padding: "3.5%", alignItems: "center"}}>
         <div style={{display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: "4%"}}>
             <h1>See logs below</h1>
             <label for="saving_on"></label>
-            <select class = "select-body" name="saving_on" id="saving_on">
+            <select className = "select-body" name="saving_on" id="saving_on">
                 <option value="cloud">Save On</option>
-                <option value="cloud">Cloud</option>              
+                <option value="cloud">AWS Cloud</option>              
                 <option value="local storage">Local Storage</option>
-                
             </select>            
             <label for="database"></label>
-            <select class="select-body" name="saving_on" id="saving_on">
+            <select className ="select-body" name="saving_on" id="Database types">
                 <option value="cloud">Select database</option>
                 <option value="cloud">MySQL</option>  
                 <option value="cloud">SQL lite3</option>             
@@ -28,7 +36,7 @@ export default function BRC() {
         </div>
         <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between", padding: "2%"}}>
             <button style={{padding: "2% 4% 1% 4%", backgroundColor: "rgb(255, 98, 42)", border: "none", borderRadius: "3px", color: "aliceblue"}}>Apply Encryption</button>
-            <select class="select-body">
+            <select className="select-body">
                 <option value="cloud">Encryption Type</option>
                 <option value="cloud">RSA</option>
                 <option value="IBM">SHA 256</option>
@@ -46,20 +54,20 @@ export default function BRC() {
         </div>
         <div style={{margin: "3.5%", display: "flex", flexDirection: "row", gap: "15%", justifyContent: "center"}}>
             <button style={{backgroundColor: "rgb(79, 182, 251)",
-                           border: "none",
-                           borderRadius: "6px",
-                           padding: "4% 6% 4% 6%"}}>Restore</button>
-            <button style={{backgroundColor: "rgb(79, 182, 251)",
-                            border: "none",
-                            borderRadius: "6px",
-                            padding: "4% 6% 4% 6%"}}>Backup</button>
-            <button style={{backgroundColor: "rgb(79, 182, 251)",
                             border: "none",
                             borderRadius: "6px",
                             padding: "4% 6% 4% 6%"}}>Restore</button>
+            <button style={{backgroundColor: "rgb(79, 182, 251)",
+                            border: "none",
+                            borderRadius: "6px",
+                            padding: "4% 6% 4% 6%"}} onClick={backup}>Backup</button>
+            <button style={{backgroundColor: "rgb(79, 182, 251)",
+                            border: "none",
+                            borderRadius: "6px",
+                            padding: "4% 6% 4% 6%"}}>Preview of Table</button>
         </div>
     </div>
     </>
-  )
+    )
 }
 
