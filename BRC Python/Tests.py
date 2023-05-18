@@ -1,5 +1,5 @@
 # import os, datetime as dt
-# import mysql.connector
+import mysql.connector
 
 # sql_files = []
 # for root, dirs, files in os.walk("./Storage"):
@@ -17,6 +17,14 @@
 #             })
 
 # print(sql_files[0]['name'])
+import subprocess, datetime as dt
+
+result = subprocess.run(["cd",f"./Storage"], capture_output=True, text=True,shell=True)
+
+result = subprocess.run(["echo","%CD%"], capture_output=True, text=True,shell=True)
+
+print(result.stderr)
+print(result.stdout)
 
 # Creating connection object
 # mydb = mysql.connector.connect(
@@ -26,26 +34,25 @@
 #     database = "siddata"
 # )
 
-# # Printing the connection object
-# print(mydb)
 
 # cursor = mydb.cursor(buffered=True)
 
-# cursor.execute("SHOW TABLES;")
+# cursor.execute(f"SOURCE /Storage/sqlBackup_2023-05-18.sql;")
 
-# items = cursor.fetchall()
+# # Show the warnings
+# for warning in mydb.connection.get_warnings():
+#     print(warning)
 
-# print(items)
+# mydb.commit()
 
-# cursor.close()
+# print("Done!")
 
-import subprocess, datetime as dt
 
-# Run the dir command and print the output to the console
+# # Run the dir command and print the output to the console
 
-backupName = f"sqlBackup_{dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}.sql"
+# backupName = f"sqlBackup_{dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}.sql"
 
-result = subprocess.run(['mysqldump', '-u', 'root', '-psid34', 'siddata', '>', './Tests/mydatabase_backup.sql'], capture_output=True, text=True, shell=True)
+# result = subprocess.run(['mysqldump', '-u', 'root', '-psid34', 'siddata', '>', './Tests/mydatabase_backup.sql'], capture_output=True, text=True, shell=True)
 
-print(result.stdout)
-print(result.stderr)
+# print(result.stdout)
+# print(result.stderr)

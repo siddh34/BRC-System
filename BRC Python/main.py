@@ -10,6 +10,8 @@ from restoreForm import restoreFormUI
 
 import sys, os, subprocess, datetime as dt, mysql.connector
 
+from cryptography.fernet import Fernet
+
 class UI(QMainWindow):
     def __init__(self):
         """Constructor use only when you have to add components to UI which also has to functional at the same time"""
@@ -125,6 +127,7 @@ class UI(QMainWindow):
         self.resForm = restoreFormUI()
         self.resForm.my_signal.connect(self.recieveRestoreData)
 
+    # function to restore backup
     def recieveRestoreData(self,data):
         print(data)
         # Open the file dialog and set the options
@@ -148,11 +151,57 @@ class UI(QMainWindow):
             command = f"mysql -u {data[2]} -p{data[1]} {data[0]} < {selected_file}"
 
             # Run the command and capture the output
-            result = subprocess.run(command, capture_output=True, text=True, shell=True)
+
+            result = subprocess.run(["mysql","-u","root",f"-p{data[1]}",f"{data[0]}","<",f"{selected_file}"], capture_output=True, text=True)
 
             print(result.stderr)
 
+            print(result.stdout)
+
             print("Done!")
+
+    def encrypt(self):
+        # Generate a random key
+        key = Fernet.generate_key()
+
+        # Save the key to a file
+        with open("key.txt", "wb") as f:
+            f.write(key)
+
+        # Load the key from a file
+        with open("key.txt", "rb") as f:
+            key = f.read()
+
+        # Create a Fernet object
+        fernet = Fernet(key)
+
+        # Encrypt a message
+        message = "This is a secret message."
+        encrypted_message = fernet.encrypt(message)
+
+        # Decrypt a message
+        decrypted_message = fernet.decrypt(encrypted_message)
+
+        # Print the decrypted message
+        print(decrypted_message)
+
+    def decrypt(self):
+        # Load the key from a file
+        with open("key.txt", "rb") as f:
+            key = f.read()
+
+        # Create a Fernet object
+        fernet = Fernet(key)
+
+        # Decrypt a message
+        with open("encrypted_file.sql", "rb") as f:
+            encrypted_file_data = f.read()
+
+        decrypted_file_data = fernet.decrypt(encrypted_file_data)
+
+        # Write the decrypted file to a file
+        with open("decrypted_file.sql", "wb") as f:
+            f.write(decrypted_file_data)
 
 
 if __name__ == '__main__':

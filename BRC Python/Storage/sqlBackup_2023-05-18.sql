@@ -92,7 +92,7 @@ CREATE TABLE `client` (
 
 LOCK TABLES `client` WRITE;
 /*!40000 ALTER TABLE `client` DISABLE KEYS */;
-INSERT INTO `client` VALUES (400,'Dunmore Highschool',2),(401,'Lackawana Country',2),(402,'FedEx',3),(403,'John Daliy Law, LLC',3),(404,'Scranton Whitepages',2),(405,'Times Newspaper',3),(406,'FedEx',2);
+INSERT INTO `client` VALUES (401,'FedEx',3),(402,'FedEx',3),(403,'John Daliy Law, LLC',3),(404,'Scranton Whitepages',2),(405,'Times Newspaper',3),(406,'FedEx',2);
 /*!40000 ALTER TABLE `client` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -266,7 +266,7 @@ CREATE TABLE `works_with` (
 
 LOCK TABLES `works_with` WRITE;
 /*!40000 ALTER TABLE `works_with` DISABLE KEYS */;
-INSERT INTO `works_with` VALUES (102,401,267000),(102,406,15000),(105,400,55000),(105,404,33000),(105,406,130000),(107,403,5000),(107,405,26000),(108,402,22500),(108,403,12000);
+INSERT INTO `works_with` VALUES (102,406,15000),(105,404,33000),(105,406,130000),(107,403,5000),(107,405,26000),(108,402,22500),(108,403,12000);
 /*!40000 ALTER TABLE `works_with` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -279,4 +279,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-04-20  1:58:56
+-- Dump completed on 2023-05-18 23:02:01
