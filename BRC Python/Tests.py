@@ -52,7 +52,7 @@ print(result.stdout)
 
 # backupName = f"sqlBackup_{dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}.sql"
 
-# result = subprocess.run(['mysqldump', '-u', 'root', '-psid34', 'siddata', '>', './Tests/mydatabase_backup.sql'], capture_output=True, text=True, shell=True)
+result = subprocess.run(['mysql', '-u', 'root', '-psid34', 'siddata', '-e', 'SOURCE ./Storage/sqlBackup_2023-05-19.sql'], capture_output=True, text=True, shell=True)
 
-# print(result.stdout)
-# print(result.stderr)
+print(result.stdout)
+print(result.stderr)
