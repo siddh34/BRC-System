@@ -147,11 +147,9 @@ class UI(QMainWindow):
             selected_file = fileDialog.selectedFiles()[0]
             print("Selected file:", selected_file)
 
-            # Build the command to restore the backup
-
             # Run the command and capture the output
 
-            result = subprocess.run(["mysql","-u","root",f"-p{data[1]}",f"{data[0]}","<",'-e', f'SOURCE {selected_file}'], capture_output=True, text=True)
+            result = subprocess.run(["mysql","-u","root",f"-p{data[1]}",f"{data[0]}",'-e', fr'SOURCE {selected_file}'], capture_output=True, text=True)
 
             print(result.stderr)
 

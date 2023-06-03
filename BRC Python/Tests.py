@@ -19,12 +19,12 @@ import mysql.connector
 # print(sql_files[0]['name'])
 import subprocess, datetime as dt
 
-result = subprocess.run(["cd",f"./Storage"], capture_output=True, text=True,shell=True)
+# result = subprocess.run(["cd",f"./Storage"], capture_output=True, text=True,shell=True)
 
-result = subprocess.run(["echo","%CD%"], capture_output=True, text=True,shell=True)
+# result = subprocess.run(["echo","%CD%"], capture_output=True, text=True,shell=True)
 
-print(result.stderr)
-print(result.stdout)
+# print(result.stderr)
+# print(result.stdout)
 
 # Creating connection object
 # mydb = mysql.connector.connect(
