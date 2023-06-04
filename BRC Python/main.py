@@ -1,14 +1,14 @@
-from PyQt5.QtWidgets import QMainWindow, QApplication, QLabel, QTabWidget, QDoubleSpinBox, QPushButton, QComboBox, QWidget, QSpinBox, QTableWidget, QFileDialog, QStatusBar, QSizeGrip, QFrame, QLineEdit, QPlainTextEdit, QTextEdit, QFileDialog
+from PyQt5.QtWidgets import QMainWindow, QApplication, QPushButton, QComboBox, QTableWidget, QFileDialog, QLineEdit, QPlainTextEdit, QTextEdit, QFileDialog, QMessageBox, QTableWidgetItem
 
-from PyQt5 import uic, QtGui
+from PyQt5 import uic
 
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtGui
 
 from form import FormUI
 
 from restoreForm import restoreFormUI
 
-import sys, os, subprocess, datetime as dt, mysql.connector
+import sys, os, pandas as pd, subprocess, datetime as dt, mysql.connector
 
 from cryptography.fernet import Fernet
 
@@ -44,7 +44,7 @@ class UI(QMainWindow):
         self.submitButton = self.findChild(QPushButton,"SubmitButton")
         self.queryButton = self.findChild(QPushButton,"Query_2")
         self.QueryBox =  self.findChild(QPlainTextEdit,"QueryBox_2")
-        self.output = self.findChild(QPlainTextEdit,"Output_2")
+        self.output = self.findChild(QTableWidget,"Output_2")
 
         # Variable on page 3
         self.selectBackup = self.findChild(QPushButton,"SelectBackup_2")
@@ -58,6 +58,7 @@ class UI(QMainWindow):
         self.refreshButton.clicked.connect(self.refreshLogAction)
         self.backupButton.clicked.connect(self.backup)
         self.recoverButton.clicked.connect(self.restore)
+        self.queryButton.clicked.connect(self.query)
 
         self.show()
 
@@ -104,6 +105,7 @@ class UI(QMainWindow):
         self.form.my_signal.connect(self.receiveData)
     
     # To recieve data from from 
+    # TODO: Implement Backup on GCP & AWS
     def receiveData(self,data):
         self.varList = data
         print(self.varList)
@@ -157,6 +159,7 @@ class UI(QMainWindow):
 
             print("Done!")
 
+    # Used for encryption
     def encrypt(self):
         # Generate a random key
         key = Fernet.generate_key()
@@ -182,6 +185,7 @@ class UI(QMainWindow):
         # Print the decrypted message
         print(decrypted_message)
 
+    # Used for decryption
     def decrypt(self):
         # Load the key from a file
         with open("key.txt", "rb") as f:
@@ -200,6 +204,41 @@ class UI(QMainWindow):
         with open("decrypted_file.sql", "wb") as f:
             f.write(decrypted_file_data)
 
+    # Query the database
+    def query(self):
+        msgBox = QMessageBox()
+        if self.hostName.text() == "" or self.password.text() == "" or self.database.text() == "" or self.userName.text() == "":
+            msgBox.setText("Please Enter the respective fields.")
+            msgBox.exec()
+        else:
+            mydatabase = mysql.connector.connect(
+                host=f"{self.hostName.text()}",
+                user=f"{self.userName.text()}",
+                password=f"{self.password.text()}",
+                database=f"{self.database.text()}"
+            )
+
+            try: 
+                cursor = self.QueryBox.textCursor()
+                cursor.select(QtGui.QTextCursor.BlockUnderCursor)
+                query = cursor.selectedText()
+
+                df = pd.read_sql_query(f'{query}', mydatabase)
+
+                self.output.setColumnCount(len(df.columns))
+                self.output.setRowCount(len(df))
+
+                headers = df.columns.tolist()
+                self.output.setHorizontalHeaderLabels(headers)
+
+                for i, row in enumerate(df.values):
+                    for j, value in enumerate(row):
+                        item = QTableWidgetItem(str(value))
+                        self.output.setItem(i, j, item)
+            except pd.errors.DatabaseError:
+                msgBox.setText("Wrong Query!")
+                msgBox.exec()
+            # TODO: Explore & add various types of exceptions
 
 if __name__ == '__main__':
     # initialize the app
