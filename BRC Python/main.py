@@ -8,7 +8,9 @@ from form import FormUI
 
 from restoreForm import restoreFormUI
 
-import sys, os, pandas as pd, subprocess, datetime as dt, mysql.connector
+from UploadAWSForm import UploadAWSForm
+
+import sys, os, pandas as pd, subprocess, datetime as dt, mysql.connector, boto3
 
 from cryptography.fernet import Fernet
 
@@ -29,12 +31,15 @@ class UI(QMainWindow):
 
         # Variable on page 1
         self.logs = self.findChild(QTableWidget,"Logs_4")
-        self.saveDropDown = self.findChild(QComboBox,"SaveOn_4")
         self.DatabaseDropDown = self.findChild(QComboBox,"Database_4")
+        self.EncryptionDropDown = self.findChild(QComboBox,"EncryptionDropDown")
         self.backupButton = self.findChild(QPushButton,"Backup_4")
         self.recoverButton = self.findChild(QPushButton,"Recover_4")
         self.selectFolder = self.findChild(QPushButton,"SelectFolder")
         self.refreshButton = self.findChild(QPushButton,"RefreshButton")
+        self.AWSUploadButton = self.findChild(QPushButton,"AWS_S3")
+        self.Encrypt = self.findChild(QPushButton,"Encrypt")
+        self.Decrypt = self.findChild(QPushButton,"Decrypt")
 
         # Variable on page 2
         self.hostName = self.findChild(QLineEdit,"hostLineEdit_2")
@@ -82,10 +87,9 @@ class UI(QMainWindow):
         self.logs.setRowCount(len(sql_files))
         row = 0
         for data in sql_files:
-            self.logs.setItem(row,0,QtWidgets.QTableWidgetItem(f"{row + 1}"))
-            self.logs.setItem(row,1,QtWidgets.QTableWidgetItem(f"{data['name']}"))
-            self.logs.setItem(row,2,QtWidgets.QTableWidgetItem(f"{data['size']}"))
-            self.logs.setItem(row,3,QtWidgets.QTableWidgetItem(f"{data['modified']}"))
+            self.logs.setItem(row,0,QtWidgets.QTableWidgetItem(f"{data['name']}"))
+            self.logs.setItem(row,1,QtWidgets.QTableWidgetItem(f"{data['size']}"))
+            self.logs.setItem(row,2,QtWidgets.QTableWidgetItem(f"{data['modified']}"))
             row = row + 1
 
     # Provides us the folder in which backups will be stored
@@ -104,8 +108,7 @@ class UI(QMainWindow):
         self.form = FormUI()
         self.form.my_signal.connect(self.receiveData)
     
-    # To recieve data from from 
-    # TODO: Implement Backup on GCP & AWS
+    # To recieve data from form for backup 
     def receiveData(self,data):
         self.varList = data
         print(self.varList)
@@ -235,10 +238,39 @@ class UI(QMainWindow):
                     for j, value in enumerate(row):
                         item = QTableWidgetItem(str(value))
                         self.output.setItem(i, j, item)
-            except pd.errors.DatabaseError:
-                msgBox.setText("Wrong Query!")
+            except Exception:
+                msgBox.setText("Something went wrong!")
                 msgBox.exec()
             # TODO: Explore & add various types of exceptions
+
+    # Uploads file to aws
+    def uploadToAWSS3(self):
+        self.AWS = UploadAWSForm()
+        self.AWS.my_signal.connect(self.receiveToUploadAWS)
+
+    # Recieve information for uploading to S3
+    def receiveToUploadAWS(self,data):
+        print(data)
+        ACCESS_KEY_ID = f"{data[0]}"
+        SECRET_ACCESS_KEY = f"{data[1]}"
+
+        # Create a Boto3 client
+        s3 = boto3.client("s3", aws_access_key_id=ACCESS_KEY_ID, aws_secret_access_key=SECRET_ACCESS_KEY)
+
+        # Upload a file to S3
+        file_path = fr"{data[2]}"
+        bucket_name = "sidmybucket1234"
+        object_key = f"backupsql_{dt.datetime.now().strftime('%Y-%m-%d')}"
+
+        s3.upload_file(file_path, bucket_name, object_key)
+
+        # Check if the file is uploaded successfully
+        response = s3.head_object(Bucket=bucket_name, Key=object_key)
+
+        if response["ResponseMetadata"]["HTTPStatusCode"] == 200:
+            print("File uploaded successfully")
+        else:
+            print("File upload failed")
 
 if __name__ == '__main__':
     # initialize the app
