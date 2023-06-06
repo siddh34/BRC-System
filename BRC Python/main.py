@@ -64,6 +64,7 @@ class UI(QMainWindow):
         self.backupButton.clicked.connect(self.backup)
         self.recoverButton.clicked.connect(self.restore)
         self.queryButton.clicked.connect(self.query)
+        self.AWSUploadButton.clicked.connect(self.uploadToAWSS3)
 
         self.show()
 
