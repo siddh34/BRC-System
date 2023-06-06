@@ -260,7 +260,7 @@ class UI(QMainWindow):
 
         # Upload a file to S3
         file_path = fr"{data[2]}"
-        bucket_name = "sidmybucket1234"
+        bucket_name = f"{data[3]}"
         object_key = f"backupsql_{dt.datetime.now().strftime('%Y-%m-%d')}"
 
         s3.upload_file(file_path, bucket_name, object_key)

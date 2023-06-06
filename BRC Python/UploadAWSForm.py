@@ -20,6 +20,7 @@ class UploadAWSForm(QMainWindow):
         #variables 
         self.accessKey = self.findChild(QLineEdit,"accessKeyIDLineEdit")
         self.secretAccessKey = self.findChild(QLineEdit,"secretAccessKeyLineEdit")
+        self.bucketName = self.findChild(QLineEdit,"bucketNameLineEdit")
         self.submitButton = self.findChild(QPushButton,"Submit")
         self.exitButton = self.findChild(QPushButton,"Exit")
 
@@ -50,7 +51,8 @@ class UploadAWSForm(QMainWindow):
 
         self.accessKeyID = self.accessKey.text()
         self.secretAccessKeyID = self.secretAccessKey.text()
-        self.my_signal.emit([self.accessKeyID,self.secretAccessKeyID,self.path])
+        self.bucket = self.bucketName.text()
+        self.my_signal.emit([self.accessKeyID,self.secretAccessKeyID,self.path,self.bucket])
 
 
 if __name__ == '__main__':

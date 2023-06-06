@@ -46,7 +46,7 @@
       <x>30</x>
       <y>10</y>
       <width>241</width>
-      <height>74</height>
+      <height>121</height>
      </rect>
     </property>
     <layout class="QFormLayout" name="formLayout">
@@ -70,12 +70,29 @@
      <item row="1" column="1">
       <widget class="QLineEdit" name="secretAccessKeyLineEdit"/>
      </item>
-     <item row="2" column="0">
+     <item row="3" column="0">
       <widget class="QLabel" name="pathOfFileLabel">
        <property name="text">
         <string/>
        </property>
       </widget>
+     </item>
+     <item row="4" column="0">
+      <widget class="QLabel" name="bucketNameLabel">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="bucketNameLabel_2">
+       <property name="text">
+        <string>Bucket Name</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QLineEdit" name="bucketNameLineEdit"/>
      </item>
     </layout>
    </widget>
