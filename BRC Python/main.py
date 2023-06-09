@@ -65,6 +65,11 @@ class UI(QMainWindow):
         self.recoverButton.clicked.connect(self.restore)
         self.queryButton.clicked.connect(self.query)
         self.AWSUploadButton.clicked.connect(self.uploadToAWSS3)
+        self.Encrypt.clicked.connect(self.encrypt)
+        self.Decrypt.clicked.connect(self.decrypt)
+
+        # variable for encryption
+        self.Encryption_Selected_file = None
 
         self.show()
 
@@ -165,48 +170,97 @@ class UI(QMainWindow):
 
     # Used for encryption
     def encrypt(self):
-        # Generate a random key
-        key = Fernet.generate_key()
+        # Open the file dialog and set the options
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        options |= QFileDialog.ShowDirsOnly
+        options |= QFileDialog.DontResolveSymlinks
 
-        # Save the key to a file
-        with open("key.txt", "wb") as f:
-            f.write(key)
+        # Set the file dialog properties
+        fileDialog = QFileDialog()
+        fileDialog.setFileMode(QFileDialog.AnyFile)
+        fileDialog.setNameFilter("SQL files (*.sql)")
+        fileDialog.setViewMode(QFileDialog.Detail)
 
-        # Load the key from a file
-        with open("key.txt", "rb") as f:
-            key = f.read()
+        # Open the file dialog and get the selected file path
+        if fileDialog.exec_() == QFileDialog.Accepted:
+            self.Encryption_Selected_file = fileDialog.selectedFiles()[0]
+            # Generate a random key
+            key = Fernet.generate_key()
 
-        # Create a Fernet object
-        fernet = Fernet(key)
+            filepath = "key.txt"
 
-        # Encrypt a message
-        message = "This is a secret message."
-        encrypted_message = fernet.encrypt(message)
+            # Checking wether key.txt exists
+            if(os.path.isfile(filepath)):
+                i = 1
+                filepath = f"key{i}.txt"
+                while(os.path.isfile(filepath)):
+                    i = i + 1
+                    filepath = f"key{i}.txt"
 
-        # Decrypt a message
-        decrypted_message = fernet.decrypt(encrypted_message)
+            # Save the key to a file
+            with open(filepath, "wb") as f:
+                f.write(key)
 
-        # Print the decrypted message
-        print(decrypted_message)
+            # Load the key from a file
+            with open(filepath, "rb") as f:
+                key = f.read()
+
+            # Create a Fernet object
+            fernet = Fernet(key)
+
+            # opening the original file to encrypt
+            with open(f'{self.Encryption_Selected_file}', 'rb') as file:
+                original = file.read()
+
+            # encrypting the file
+            encrypted = fernet.encrypt(original)
+
+            # opening the file in write mode and
+            # writing the encrypted data
+            with open(f'{self.Encryption_Selected_file}', 'wb') as encrypted_file:
+                encrypted_file.write(encrypted)
 
     # Used for decryption
     def decrypt(self):
-        # Load the key from a file
-        with open("key.txt", "rb") as f:
-            key = f.read()
+        # Open the file dialog and set the options
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        options |= QFileDialog.ShowDirsOnly
+        options |= QFileDialog.DontResolveSymlinks
 
-        # Create a Fernet object
-        fernet = Fernet(key)
+        # Set the file dialog properties
+        fileDialog = QFileDialog()
+        fileDialog.setFileMode(QFileDialog.AnyFile)
+        fileDialog.setNameFilter("Text (*.txt)")
+        fileDialog.setViewMode(QFileDialog.Detail)
 
-        # Decrypt a message
-        with open("encrypted_file.sql", "rb") as f:
-            encrypted_file_data = f.read()
+        fileDialog2 = QFileDialog()
+        fileDialog2.setFileMode(QFileDialog.AnyFile)
+        fileDialog2.setViewMode(QFileDialog.Detail)
 
-        decrypted_file_data = fernet.decrypt(encrypted_file_data)
+        # Open the file dialog and get the selected file path
+        if fileDialog.exec_() == QFileDialog.Accepted and fileDialog2.exec_() == QFileDialog.Accepted:
+            key_file = fileDialog.selectedFiles()[0]
+            encrypted_file = fileDialog2.selectedFiles()[0]
+            
+            with open(f"{key_file}", "rb") as f:
+                key = f.read()
 
-        # Write the decrypted file to a file
-        with open("decrypted_file.sql", "wb") as f:
-            f.write(decrypted_file_data)
+            # Create a Fernet object
+            fernet = Fernet(key)
+
+            # opening the encrypted file
+            with open(f'{encrypted_file}', 'rb') as enc_file:
+                encrypted = enc_file.read()
+
+            # decrypting the file
+            decrypted = fernet.decrypt(encrypted)
+
+            # opening the file in write mode and
+            # writing the decrypted data
+            with open(f'{encrypted_file}', 'wb') as dec_file:
+                dec_file.write(decrypted)
 
     # Query the database
     def query(self):
@@ -272,6 +326,10 @@ class UI(QMainWindow):
             print("File uploaded successfully")
         else:
             print("File upload failed")
+
+    # Convert function
+    def convert(self):
+        pass
 
 if __name__ == '__main__':
     # initialize the app
