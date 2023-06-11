@@ -225,6 +225,11 @@
         <string>Symmetric</string>
        </property>
       </item>
+      <item>
+       <property name="text">
+        <string>Ceasar</string>
+       </property>
+      </item>
      </widget>
     </widget>
     <widget class="QWidget" name="tab_11">
@@ -360,7 +365,7 @@
      <attribute name="title">
       <string>Tab 3</string>
      </attribute>
-     <widget class="QPushButton" name="SelectBackup_2">
+     <widget class="QPushButton" name="Convert">
       <property name="geometry">
        <rect>
         <x>50</x>
@@ -370,7 +375,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>Select Backup</string>
+       <string>Convert</string>
       </property>
      </widget>
      <widget class="QComboBox" name="DatabaseC_2">
@@ -396,9 +401,9 @@
      <widget class="QLabel" name="ConvertLabel_2">
       <property name="geometry">
        <rect>
-        <x>640</x>
+        <x>170</x>
         <y>20</y>
-        <width>91</width>
+        <width>581</width>
         <height>31</height>
        </rect>
       </property>
@@ -408,14 +413,14 @@
        </font>
       </property>
       <property name="text">
-       <string>Convert </string>
+       <string>Convert a Table From One Database To Other</string>
       </property>
      </widget>
      <widget class="QPushButton" name="Save">
       <property name="geometry">
        <rect>
         <x>210</x>
-        <y>260</y>
+        <y>290</y>
         <width>171</width>
         <height>61</height>
        </rect>
@@ -441,7 +446,7 @@
       <property name="geometry">
        <rect>
         <x>450</x>
-        <y>260</y>
+        <y>290</y>
         <width>171</width>
         <height>61</height>
        </rect>
@@ -454,7 +459,7 @@
       <property name="geometry">
        <rect>
         <x>50</x>
-        <y>360</y>
+        <y>380</y>
         <width>711</width>
         <height>121</height>
        </rect>

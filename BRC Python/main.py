@@ -10,6 +10,8 @@ from restoreForm import restoreFormUI
 
 from UploadAWSForm import UploadAWSForm
 
+from ceasarForm import ceasarFormUI
+
 import sys, os, pandas as pd, subprocess, datetime as dt, mysql.connector, boto3
 
 from cryptography.fernet import Fernet
@@ -52,10 +54,10 @@ class UI(QMainWindow):
         self.output = self.findChild(QTableWidget,"Output_2")
 
         # Variable on page 3
-        self.selectBackup = self.findChild(QPushButton,"SelectBackup_2")
-        self.convert = self.findChild(QPushButton,"DatabaseC_2")
-        self.save = self.findChild(QPushButton,"Save")
-        self.preview = self.findChild(QPushButton,"Preview")
+        self.ConvertButton = self.findChild(QPushButton,"Convert")
+        self.convertToCombo = self.findChild(QComboBox,"DatabaseC_2")
+        self.saveButton = self.findChild(QPushButton,"Save")
+        self.previewButton = self.findChild(QPushButton,"Preview")
         self.PreviewBox = self.findChild(QTextEdit,"PreviewBox")
 
         # Assigning functions to buttons
@@ -170,97 +172,180 @@ class UI(QMainWindow):
 
     # Used for encryption
     def encrypt(self):
-        # Open the file dialog and set the options
-        options = QFileDialog.Options()
-        options |= QFileDialog.DontUseNativeDialog
-        options |= QFileDialog.ShowDirsOnly
-        options |= QFileDialog.DontResolveSymlinks
+        if self.EncryptionDropDown.currentIndex() == 0:
+            # Open the file dialog and set the options
+            options = QFileDialog.Options()
+            options |= QFileDialog.DontUseNativeDialog
+            options |= QFileDialog.ShowDirsOnly
+            options |= QFileDialog.DontResolveSymlinks
 
-        # Set the file dialog properties
-        fileDialog = QFileDialog()
-        fileDialog.setFileMode(QFileDialog.AnyFile)
-        fileDialog.setNameFilter("SQL files (*.sql)")
-        fileDialog.setViewMode(QFileDialog.Detail)
+            # Set the file dialog properties
+            fileDialog = QFileDialog()
+            fileDialog.setFileMode(QFileDialog.AnyFile)
+            fileDialog.setNameFilter("SQL files (*.sql)")
+            fileDialog.setViewMode(QFileDialog.Detail)
 
-        # Open the file dialog and get the selected file path
-        if fileDialog.exec_() == QFileDialog.Accepted:
-            self.Encryption_Selected_file = fileDialog.selectedFiles()[0]
-            # Generate a random key
-            key = Fernet.generate_key()
+            # Open the file dialog and get the selected file path
+            if fileDialog.exec_() == QFileDialog.Accepted:
+                self.Encryption_Selected_file = fileDialog.selectedFiles()[0]
+                # Generate a random key
+                key = Fernet.generate_key()
 
-            filepath = "key.txt"
+                filepath = "key.txt"
 
-            # Checking wether key.txt exists
-            if(os.path.isfile(filepath)):
-                i = 1
-                filepath = f"key{i}.txt"
-                while(os.path.isfile(filepath)):
-                    i = i + 1
+                # Checking wether key.txt exists
+                if(os.path.isfile(filepath)):
+                    i = 1
                     filepath = f"key{i}.txt"
+                    while(os.path.isfile(filepath)):
+                        i = i + 1
+                        filepath = f"key{i}.txt"
 
-            # Save the key to a file
-            with open(filepath, "wb") as f:
-                f.write(key)
+                # Save the key to a file
+                with open(filepath, "wb") as f:
+                    f.write(key)
 
-            # Load the key from a file
-            with open(filepath, "rb") as f:
-                key = f.read()
+                # Load the key from a file
+                with open(filepath, "rb") as f:
+                    key = f.read()
 
-            # Create a Fernet object
-            fernet = Fernet(key)
+                # Create a Fernet object
+                fernet = Fernet(key)
 
-            # opening the original file to encrypt
-            with open(f'{self.Encryption_Selected_file}', 'rb') as file:
-                original = file.read()
+                # opening the original file to encrypt
+                with open(f'{self.Encryption_Selected_file}', 'rb') as file:
+                    original = file.read()
 
-            # encrypting the file
-            encrypted = fernet.encrypt(original)
+                # encrypting the file
+                encrypted = fernet.encrypt(original)
 
-            # opening the file in write mode and
-            # writing the encrypted data
-            with open(f'{self.Encryption_Selected_file}', 'wb') as encrypted_file:
-                encrypted_file.write(encrypted)
+                # opening the file in write mode and
+                # writing the encrypted data
+                with open(f'{self.Encryption_Selected_file}', 'wb') as encrypted_file:
+                    encrypted_file.write(encrypted)
+        elif self.EncryptionDropDown.currentIndex() == 1:
+            # Open the file dialog and set the options
+            options = QFileDialog.Options()
+            options |= QFileDialog.DontUseNativeDialog
+            options |= QFileDialog.ShowDirsOnly
+            options |= QFileDialog.DontResolveSymlinks
+
+            # Set the file dialog properties
+            fileDialog = QFileDialog()
+            fileDialog.setFileMode(QFileDialog.AnyFile)
+            fileDialog.setViewMode(QFileDialog.Detail)
+
+            # Open the file dialog and get the selected file path
+            if fileDialog.exec_() == QFileDialog.Accepted:
+                file_selected = fileDialog.selectedFiles()[0]
+                self.realFile = f"{file_selected}"
+                self.getKeyForm()
+
+    # Used for ceaesar encryption
+    def caesar_encrypt(self,realText,step):
+        outText = []
+        cryptText = []
+        uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+        lowercase = 'abcdefghijklmnopqrstuvwxyz'
+        for eachLetter in realText:
+            if eachLetter in uppercase:
+                index = uppercase.index(eachLetter)
+                crypting = (index + int(step)) % 26
+                cryptText.append(crypting)
+                newLetter = uppercase[crypting]
+                outText.append(newLetter)
+            elif eachLetter in lowercase:
+                index = lowercase.index(eachLetter)
+                crypting = (index + int(step)) % 26
+                cryptText.append(crypting)
+                newLetter = lowercase[crypting]
+                outText.append(newLetter)
+            elif eachLetter == " " or eachLetter == "\t" or eachLetter == "\n":
+                outText.append(eachLetter)
+        return outText
+
+    # Redirects To ceasear form
+    def getKeyForm(self):
+        self.CeasarForm = ceasarFormUI()
+        self.CeasarForm.my_signal.connect(self.getKey)
+
+    # Does the encryption
+    def getKey(self,data):
+        step = data[0]
+        with open(self.realFile, 'r') as f:
+            text = f.read()
+        code = self.caesar_encrypt(text,step)
+        with open(self.realFile + ".encrypted", 'w') as f:
+            for i in code:
+                f.write(i)
+        print("The Encrypted Message is saved in", self.realFile + ".encrypted")
 
     # Used for decryption
     def decrypt(self):
-        # Open the file dialog and set the options
-        options = QFileDialog.Options()
-        options |= QFileDialog.DontUseNativeDialog
-        options |= QFileDialog.ShowDirsOnly
-        options |= QFileDialog.DontResolveSymlinks
+        if self.EncryptionDropDown.currentIndex() == 0:
+            # Open the file dialog and set the options
+            options = QFileDialog.Options()
+            options |= QFileDialog.DontUseNativeDialog
+            options |= QFileDialog.ShowDirsOnly
+            options |= QFileDialog.DontResolveSymlinks
 
-        # Set the file dialog properties
-        fileDialog = QFileDialog()
-        fileDialog.setFileMode(QFileDialog.AnyFile)
-        fileDialog.setNameFilter("Text (*.txt)")
-        fileDialog.setViewMode(QFileDialog.Detail)
+            # Set the file dialog properties
+            fileDialog = QFileDialog()
+            fileDialog.setFileMode(QFileDialog.AnyFile)
+            fileDialog.setNameFilter("Text (*.txt)")
+            fileDialog.setViewMode(QFileDialog.Detail)
 
-        fileDialog2 = QFileDialog()
-        fileDialog2.setFileMode(QFileDialog.AnyFile)
-        fileDialog2.setViewMode(QFileDialog.Detail)
+            fileDialog2 = QFileDialog()
+            fileDialog2.setFileMode(QFileDialog.AnyFile)
+            fileDialog2.setViewMode(QFileDialog.Detail)
 
-        # Open the file dialog and get the selected file path
-        if fileDialog.exec_() == QFileDialog.Accepted and fileDialog2.exec_() == QFileDialog.Accepted:
-            key_file = fileDialog.selectedFiles()[0]
-            encrypted_file = fileDialog2.selectedFiles()[0]
-            
-            with open(f"{key_file}", "rb") as f:
-                key = f.read()
+            # Open the file dialog and get the selected file path
+            if fileDialog.exec_() == QFileDialog.Accepted and fileDialog2.exec_() == QFileDialog.Accepted:
+                key_file = fileDialog.selectedFiles()[0]
+                encrypted_file = fileDialog2.selectedFiles()[0]
+                
+                with open(f"{key_file}", "rb") as f:
+                    key = f.read()
 
-            # Create a Fernet object
-            fernet = Fernet(key)
+                # Create a Fernet object
+                fernet = Fernet(key)
 
-            # opening the encrypted file
-            with open(f'{encrypted_file}', 'rb') as enc_file:
-                encrypted = enc_file.read()
+                # opening the encrypted file
+                with open(f'{encrypted_file}', 'rb') as enc_file:
+                    encrypted = enc_file.read()
 
-            # decrypting the file
-            decrypted = fernet.decrypt(encrypted)
+                # decrypting the file
+                decrypted = fernet.decrypt(encrypted)
 
-            # opening the file in write mode and
-            # writing the decrypted data
-            with open(f'{encrypted_file}', 'wb') as dec_file:
-                dec_file.write(decrypted)
+                # opening the file in write mode and
+                # writing the decrypted data
+                with open(f'{encrypted_file}', 'wb') as dec_file:
+                    dec_file.write(decrypted)
+        elif self.EncryptionDropDown.currentIndex() == 1:
+            pass
+
+    # Used for ceaesar decryption
+    def caesar_decrypt(realText, step):
+        outText = []
+        cryptText = []
+        uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+        lowercase = 'abcdefghijklmnopqrstuvwxyz'
+        for eachLetter in realText:
+            if eachLetter in uppercase:
+                index = uppercase.index(eachLetter)
+                crypting = (index - int(step)) % 26
+                cryptText.append(crypting)
+                newLetter = uppercase[crypting]
+                outText.append(newLetter)
+            elif eachLetter in lowercase:
+                index = lowercase.index(eachLetter)
+                crypting = (index - int(step)) % 26
+                cryptText.append(crypting)
+                newLetter = lowercase[crypting]
+                outText.append(newLetter)
+            elif eachLetter == " " or eachLetter == "\t" or eachLetter == "\n":
+                outText.append(eachLetter)
+        return outText
 
     # Query the database
     def query(self):
