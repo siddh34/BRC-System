@@ -16,6 +16,8 @@ import sys, os, pandas as pd, subprocess, datetime as dt, mysql.connector, boto3
 
 from cryptography.fernet import Fernet
 
+from pymongo import MongoClient
+
 class UI(QMainWindow):
     def __init__(self):
         """Constructor use only when you have to add components to UI which also has to functional at the same time"""
@@ -322,10 +324,40 @@ class UI(QMainWindow):
                 with open(f'{encrypted_file}', 'wb') as dec_file:
                     dec_file.write(decrypted)
         elif self.EncryptionDropDown.currentIndex() == 1:
-            pass
+            # Open the file dialog and set the options
+            options = QFileDialog.Options()
+            options |= QFileDialog.DontUseNativeDialog
+            options |= QFileDialog.ShowDirsOnly
+            options |= QFileDialog.DontResolveSymlinks
+
+            # Set the file dialog properties
+            fileDialog = QFileDialog()
+            fileDialog.setFileMode(QFileDialog.AnyFile)
+            fileDialog.setViewMode(QFileDialog.Detail)
+
+            # Open the file dialog and get the selected file path
+            if fileDialog.exec_() == QFileDialog.Accepted:
+                file_selected = fileDialog.selectedFiles()[0]
+                self.realFile = f"{file_selected}"
+                self.getKeyFormDecrypt()
+
+    def getKeyFormDecrypt(self):
+        self.CeasarForm = ceasarFormUI()
+        self.CeasarForm.my_signal.connect(self.getKeyDecrypt)
+
+    # Does the encryption
+    def getKeyDecrypt(self,data):
+        step = data[0]
+        with open(self.realFile, 'r') as f:
+            text = f.read()
+        code = self.caesar_decrypt(text,step)
+        with open(self.realFile + ".decrypted", 'w') as f:
+            for i in code:
+                f.write(i)
+        print("The Decrypted Message is saved in", self.realFile + ".decrypted")
 
     # Used for ceaesar decryption
-    def caesar_decrypt(realText, step):
+    def caesar_decrypt(self,realText, step):
         outText = []
         cryptText = []
         uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -414,7 +446,32 @@ class UI(QMainWindow):
 
     # Convert function
     def convert(self):
-        pass
+        # Connect to the SQL database
+        sql_connection = mysql.connector.connect(
+            host='localhost',
+            user='root',
+            password='sid34',
+            database='siddata'
+        )
+
+        # Connect to the MongoDB database
+        mongo_client = MongoClient('mongodb://localhost:27017/')
+        mongo_db = mongo_client['test']
+        mongo_collection = mongo_db['newH']
+
+        # Retrieve data from the SQL table
+        sql_cursor = sql_connection.cursor()
+        sql_cursor.execute('SELECT * FROM client')
+        sql_data = sql_cursor.fetchall()
+
+        # Transform and insert data into MongoDB collection
+        for row in sql_data:
+            doc = {
+                'field1': row[0],
+                'field2': row[1],
+                # Add more fields as needed, mapping SQL columns to MongoDB fields
+            }
+            mongo_collection.insert_one(doc)
 
 if __name__ == '__main__':
     # initialize the app
