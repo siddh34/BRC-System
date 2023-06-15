@@ -420,7 +420,7 @@
       <property name="geometry">
        <rect>
         <x>210</x>
-        <y>290</y>
+        <y>370</y>
         <width>171</width>
         <height>61</height>
        </rect>
@@ -433,7 +433,7 @@
       <property name="geometry">
        <rect>
         <x>50</x>
-        <y>160</y>
+        <y>280</y>
         <width>691</width>
         <height>71</height>
        </rect>
@@ -445,8 +445,8 @@
      <widget class="QPushButton" name="Preview">
       <property name="geometry">
        <rect>
-        <x>450</x>
-        <y>290</y>
+        <x>440</x>
+        <y>370</y>
         <width>171</width>
         <height>61</height>
        </rect>
@@ -459,10 +459,33 @@
       <property name="geometry">
        <rect>
         <x>50</x>
-        <y>380</y>
+        <y>460</y>
         <width>711</width>
         <height>121</height>
        </rect>
+      </property>
+     </widget>
+     <widget class="QTextEdit" name="schemaData">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>180</y>
+        <width>711</width>
+        <height>81</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="schemaLabel">
+      <property name="geometry">
+       <rect>
+        <x>60</x>
+        <y>150</y>
+        <width>301</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Enter you schema below ( use spaces in between )</string>
       </property>
      </widget>
     </widget>

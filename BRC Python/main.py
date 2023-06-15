@@ -61,6 +61,7 @@ class UI(QMainWindow):
         self.saveButton = self.findChild(QPushButton,"Save")
         self.previewButton = self.findChild(QPushButton,"Preview")
         self.PreviewBox = self.findChild(QTextEdit,"PreviewBox")
+        self.fields = self.findChild(QTextEdit,"schemaData")
 
         # Assigning functions to buttons
         self.selectFolder.clicked.connect(self.selectFolderAction)
@@ -446,6 +447,9 @@ class UI(QMainWindow):
 
     # Convert function
     def convert(self):
+        # split the fields
+        self.fieldsLines = self.fields.toPlainText().split(" ")
+
         # Connect to the SQL database
         sql_connection = mysql.connector.connect(
             host='localhost',
@@ -466,12 +470,13 @@ class UI(QMainWindow):
 
         # Transform and insert data into MongoDB collection
         for row in sql_data:
-            doc = {
-                'field1': row[0],
-                'field2': row[1],
-                # Add more fields as needed, mapping SQL columns to MongoDB fields
-            }
+            doc = {}
+            for i, myfield in enumerate(self.fieldsLines):
+                doc[myfield] = row[i]
             mongo_collection.insert_one(doc)
+
+    # TODO: Traverse mongo collection & get preview for text
+
 
 if __name__ == '__main__':
     # initialize the app
