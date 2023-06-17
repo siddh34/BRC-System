@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QMainWindow, QApplication, QPushButton, QComboBox, QTableWidget, QFileDialog, QLineEdit, QPlainTextEdit, QTextEdit, QFileDialog, QMessageBox, QTableWidgetItem
+from PyQt5.QtWidgets import QMainWindow, QApplication, QPushButton, QComboBox, QTableWidget, QFileDialog, QLineEdit, QPlainTextEdit, QTextEdit, QFileDialog, QMessageBox, QTableWidgetItem, QProgressBar
 
 from PyQt5 import uic
 
@@ -6,11 +6,15 @@ from PyQt5 import QtWidgets, QtGui
 
 from form import FormUI
 
+# from PyQt5.QtCore import QBasicTimer
+
 from restoreForm import restoreFormUI
 
 from UploadAWSForm import UploadAWSForm
 
 from ceasarForm import ceasarFormUI
+
+from convertTableForm import convertFormUI
 
 import sys, os, pandas as pd, subprocess, datetime as dt, mysql.connector, boto3
 
@@ -62,6 +66,7 @@ class UI(QMainWindow):
         self.previewButton = self.findChild(QPushButton,"Preview")
         self.PreviewBox = self.findChild(QTextEdit,"PreviewBox")
         self.fields = self.findChild(QTextEdit,"schemaData")
+        self.progressBar = self.findChild(QProgressBar,"progressBar")
 
         # Assigning functions to buttons
         self.selectFolder.clicked.connect(self.selectFolderAction)
@@ -72,6 +77,14 @@ class UI(QMainWindow):
         self.AWSUploadButton.clicked.connect(self.uploadToAWSS3)
         self.Encrypt.clicked.connect(self.encrypt)
         self.Decrypt.clicked.connect(self.decrypt)
+        self.ConvertButton.clicked.connect(self.convertForm)
+
+        # These variables are for QProgressBar
+        # self.timer = QBasicTimer()
+        # self.step = 0
+        self.progressBar.setMinimum(0)
+        self.progressBar.setMaximum(100)
+        self.progressBar.setValue(0)
 
         # variable for encryption
         self.Encryption_Selected_file = None
@@ -387,19 +400,20 @@ class UI(QMainWindow):
             msgBox.setText("Please Enter the respective fields.")
             msgBox.exec()
         else:
-            mydatabase = mysql.connector.connect(
-                host=f"{self.hostName.text()}",
-                user=f"{self.userName.text()}",
-                password=f"{self.password.text()}",
-                database=f"{self.database.text()}"
-            )
-
             try: 
+                mydatabase = mysql.connector.connect(
+                    host=f"{self.hostName.text()}",
+                    user=f"{self.userName.text()}",
+                    password=f"{self.password.text()}",
+                    database=f"{self.database.text()}"
+                )
                 cursor = self.QueryBox.textCursor()
                 cursor.select(QtGui.QTextCursor.BlockUnderCursor)
                 query = cursor.selectedText()
 
                 df = pd.read_sql_query(f'{query}', mydatabase)
+
+                # TODO: convert df to actual df to get a savable xlxs
 
                 self.output.setColumnCount(len(df.columns))
                 self.output.setRowCount(len(df))
@@ -411,10 +425,9 @@ class UI(QMainWindow):
                     for j, value in enumerate(row):
                         item = QTableWidgetItem(str(value))
                         self.output.setItem(i, j, item)
-            except Exception:
-                msgBox.setText("Something went wrong!")
+            except Exception as e:
+                msgBox.setText(f"{str(e)}")
                 msgBox.exec()
-            # TODO: Explore & add various types of exceptions
 
     # Uploads file to aws
     def uploadToAWSS3(self):
@@ -445,38 +458,61 @@ class UI(QMainWindow):
         else:
             print("File upload failed")
 
+    # pulls out the convert form
+    def convertForm(self):
+        self.ConvertForm = convertFormUI()
+        self.ConvertForm.my_signal.connect(self.convert)
+
     # Convert function
-    def convert(self):
+    def convert(self,data):
         # split the fields
         self.fieldsLines = self.fields.toPlainText().split(" ")
 
+        self.progressBar.setValue(10)
+    
         # Connect to the SQL database
         sql_connection = mysql.connector.connect(
-            host='localhost',
-            user='root',
-            password='sid34',
-            database='siddata'
+            host=f'{data[2]}',
+            user=f'{data[3]}',
+            password=f'{data[1]}',
+            database=f'{data[0]}'
         )
+
+        self.progressBar.setValue(20)
+
 
         # Connect to the MongoDB database
         mongo_client = MongoClient('mongodb://localhost:27017/')
-        mongo_db = mongo_client['test']
-        mongo_collection = mongo_db['newH']
+        mongo_db = mongo_client[f'{data[4]}']
+        mongo_collection = mongo_db[f'{data[5]}']
 
         # Retrieve data from the SQL table
         sql_cursor = sql_connection.cursor()
-        sql_cursor.execute('SELECT * FROM client')
+        sql_cursor.execute(f'SELECT * FROM {data[6]}')
         sql_data = sql_cursor.fetchall()
 
+        self.progressBar.setValue(45)
+
         # Transform and insert data into MongoDB collection
+        j = 0
         for row in sql_data:
             doc = {}
+            j += 5
             for i, myfield in enumerate(self.fieldsLines):
                 doc[myfield] = row[i]
+                self.progressBar.setValue(45 + j)
+
             mongo_collection.insert_one(doc)
 
-    # TODO: Traverse mongo collection & get preview for text
+        self.progressBar.setValue(100)
 
+    # Save Function for convert screen
+    def saveConvert(self):
+        pass
+
+    # Preview Function for convert screen
+    def previewConvert(self):
+        pass
 
 if __name__ == '__main__':
     # initialize the app
