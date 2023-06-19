@@ -242,7 +242,7 @@
         <x>40</x>
         <y>340</y>
         <width>731</width>
-        <height>131</height>
+        <height>181</height>
        </rect>
       </property>
      </widget>
@@ -358,6 +358,39 @@
       </property>
       <property name="text">
        <string>Query Tab</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="DatabaseSelectTab2">
+      <property name="geometry">
+       <rect>
+        <x>400</x>
+        <y>100</y>
+        <width>91</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string>SQL</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Mongo</string>
+       </property>
+      </item>
+     </widget>
+     <widget class="QLabel" name="label">
+      <property name="geometry">
+       <rect>
+        <x>390</x>
+        <y>50</y>
+        <width>101</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Select Database</string>
       </property>
      </widget>
     </widget>
