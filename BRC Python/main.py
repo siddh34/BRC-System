@@ -16,7 +16,9 @@ from ceasarForm import ceasarFormUI
 
 from convertTableForm import convertFormUI
 
-import sys, os, pandas as pd, subprocess, datetime as dt, mysql.connector, boto3
+import sys, os, pandas as pd, subprocess, datetime as dt, mysql.connector, boto3, json
+
+from bson import json_util
 
 from cryptography.fernet import Fernet
 
@@ -78,6 +80,8 @@ class UI(QMainWindow):
         self.Encrypt.clicked.connect(self.encrypt)
         self.Decrypt.clicked.connect(self.decrypt)
         self.ConvertButton.clicked.connect(self.convertForm)
+        self.previewButton.clicked.connect(self.previewConvert)
+        self.saveButton.clicked.connect(self.saveConvert)
 
         # These variables are for QProgressBar
         # self.timer = QBasicTimer()
@@ -469,7 +473,10 @@ class UI(QMainWindow):
         self.fieldsLines = self.fields.toPlainText().split(" ")
 
         self.progressBar.setValue(10)
-    
+
+        # saving the datalist
+        self.dataList = data
+
         # Connect to the SQL database
         sql_connection = mysql.connector.connect(
             host=f'{data[2]}',
@@ -508,11 +515,70 @@ class UI(QMainWindow):
 
     # Save Function for convert screen
     def saveConvert(self):
-        pass
+        msgBox = QMessageBox()
+        try:
+            # Connect to the MongoDB server
+            client = MongoClient('mongodb://localhost:27017/')
+
+            # Access the MongoDB database and collection
+            db = client[f'{self.dataList[4]}']
+            collection = db[f'{self.dataList[5]}']
+
+            # Retrieve the documents from the collection
+            documents = collection.find()
+
+            # Convert the documents to a list of dictionaries
+            document_list = [doc for doc in documents]
+
+            # Serialize the documents to JSON using json_util
+            json_data = json.dumps(document_list, default=json_util.default, indent=4)
+
+            filepath = "output.json"
+
+            # Checking wether output file exists
+            if(os.path.isfile(filepath)):
+                i = 1
+                filepath = f"output{i}.json"
+                while(os.path.isfile(filepath)):
+                    i = i + 1
+                    filepath = f"output{i}.json"
+
+            # Save the JSON data to a file
+            with open(f'{filepath}', 'w') as file:
+                file.write(json_data)
+
+            # Close the MongoDB connection
+            client.close()
+        except Exception as e:
+            msgBox.setText(f"Please use convert first")
+            msgBox.exec()
 
     # Preview Function for convert screen
     def previewConvert(self):
-        pass
+        msgBox = QMessageBox()
+        try:
+            client = MongoClient('mongodb://localhost:27017/')
+
+            # Access the MongoDB database and collection
+            db = client[f'{self.dataList[4]}']
+            collection = db[f'{self.dataList[5]}']
+
+            # Retrieve the documents from the collection
+            documents = collection.find()
+
+            # Convert the documents to a list of dictionaries
+            document_list = [doc for doc in documents]
+
+            # Serialize the documents to JSON using json_util
+            json_data = json.dumps(document_list, default=json_util.default, indent=4)
+
+            self.PreviewBox.setPlainText(json_data)
+
+            # close connection
+            client.close()
+        except Exception as e:
+            msgBox.setText(f"Please use convert first")
+            msgBox.exec()
 
 if __name__ == '__main__':
     # initialize the app
