@@ -16,6 +16,8 @@ from ceasarForm import ceasarFormUI
 
 from convertTableForm import convertFormUI
 
+from mongoBackupForm import mongoBackUpFormUI
+
 import sys, os, pandas as pd, subprocess, datetime as dt, mysql.connector, boto3, json
 
 from bson import json_util
@@ -97,28 +99,53 @@ class UI(QMainWindow):
 
     # To show logs
     def displayLogs(self,directory):
-        sql_files = []
-        for root, dirs, files in os.walk("./Storage"):
-            for file in files:  
-                if file.endswith('.sql'):
-                    file_path = os.path.join(root, file)
-                    size = os.path.getsize(file_path)
-                    modified_timestamp = os.path.getmtime(file_path)
+        if self.DatabaseDropDown.currentIndex() == 0:
+            sql_files = []
+            for root, dirs, files in os.walk(directory):
+                for file in files:  
+                    if file.endswith('.sql'):
+                        file_path = os.path.join(root, file)
+                        size = os.path.getsize(file_path)
+                        modified_timestamp = os.path.getmtime(file_path)
+                        modified_datetime = dt.datetime.fromtimestamp(modified_timestamp)
+                        modified_str = modified_datetime.strftime('%Y-%m-%d %H:%M:%S')
+                        sql_files.append({
+                            'name': file,
+                            'size': size,
+                            'modified': modified_str
+                        })
+
+            # Updating the table
+
+            self.logs.setRowCount(len(sql_files))
+            row = 0
+            for data in sql_files:
+                self.logs.setItem(row,0,QtWidgets.QTableWidgetItem(f"{data['name']}"))
+                self.logs.setItem(row,1,QtWidgets.QTableWidgetItem(f"{data['size']}"))
+                self.logs.setItem(row,2,QtWidgets.QTableWidgetItem(f"{data['modified']}"))
+                row = row + 1
+
+        elif self.DatabaseDropDown.currentIndex() == 1:
+            directories = []
+            for entry in os.scandir(directory):
+                if entry.is_dir():
+                    subdirectory = entry.path
+                    size = os.path.getsize(subdirectory)
+                    modified_timestamp = os.path.getmtime(subdirectory)
                     modified_datetime = dt.datetime.fromtimestamp(modified_timestamp)
                     modified_str = modified_datetime.strftime('%Y-%m-%d %H:%M:%S')
-                    sql_files.append({
-                        'name': file,
+                    directories.append({
+                        'name': entry.name,
                         'size': size,
                         'modified': modified_str
                     })
-
-        self.logs.setRowCount(len(sql_files))
-        row = 0
-        for data in sql_files:
-            self.logs.setItem(row,0,QtWidgets.QTableWidgetItem(f"{data['name']}"))
-            self.logs.setItem(row,1,QtWidgets.QTableWidgetItem(f"{data['size']}"))
-            self.logs.setItem(row,2,QtWidgets.QTableWidgetItem(f"{data['modified']}"))
-            row = row + 1
+            self.logs.setRowCount(len(directories))
+            row = 0
+            for data in directories:
+                self.logs.setItem(row,0,QtWidgets.QTableWidgetItem(f"{data['name']}"))
+                self.logs.setItem(row,1,QtWidgets.QTableWidgetItem(f"{data['size']}"))
+                self.logs.setItem(row,2,QtWidgets.QTableWidgetItem(f"{data['modified']}"))
+                row = row + 1
 
     # Provides us the folder in which backups will be stored
     def selectFolderAction(self):
@@ -132,28 +159,50 @@ class UI(QMainWindow):
 
     # To backup in specific directory
     def backup(self):
-        self.checkPressed = False
-        self.form = FormUI()
-        self.form.my_signal.connect(self.receiveData)
-    
+        if self.DatabaseDropDown.currentIndex() == 0:
+            self.checkPressed = False
+            self.form = FormUI()
+            self.form.my_signal.connect(self.receiveData)
+        elif self.DatabaseDropDown.currentIndex() == 1:
+            self.form = mongoBackUpFormUI()
+            self.form.my_signal.connect(self.receiveData)
+
     # To recieve data from form for backup 
     def receiveData(self,data):
-        self.varList = data
-        print(self.varList)
+        if self.DatabaseDropDown.currentIndex() == 0:
+            self.varList = data
+            print(self.varList)
 
-        # taking username and password
-        if(self.varList[2] == True):
-            self.sqlDatabaseName = self.varList[0]
-            self.sqlUserPassword = self.varList[1]
-            print(self.sqlDatabaseName)
-            print(self.sqlUserPassword)
+            # taking username and password
+            if(self.varList[2] == True):
+                self.sqlDatabaseName = self.varList[0]
+                self.sqlUserPassword = self.varList[1]
+                print(self.sqlDatabaseName)
+                print(self.sqlUserPassword)
 
-            backupName = f"sqlBackup_{dt.datetime.now().strftime('%Y-%m-%d')}.sql"
-            print(self.path)
-            print(f'{self.path+"/"}{backupName}')
-            if self.path != None:
-                res = subprocess.run(['mysqldump', '-u', 'root', f'-p{self.sqlUserPassword}', f'{self.sqlDatabaseName}', '>', f'{self.path+"/"}{backupName}'], capture_output=True, text=True, shell=True)
-                print(res.stderr)
+                backupName = f"sqlBackup_{dt.datetime.now().strftime('%Y-%m-%d')}.sql"
+                print(self.path)
+                print(f'{self.path+"/"}{backupName}')
+                if self.path != None:
+                    res = subprocess.run(['mysqldump', '-u', 'root', f'-p{self.sqlUserPassword}', f'{self.sqlDatabaseName}', '>', f'{self.path+"/"}{backupName}'], capture_output=True, text=True, shell=True)
+                    print(res.stderr)
+        elif self.DatabaseDropDown.currentIndex() == 1:
+            print(data)
+            # Get the path
+            curr = QFileDialog.getExistingDirectory(self, 'Select Folder')
+
+            mongoBackupName = f"mongoBackup_{dt.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
+
+            # Path
+            path = os.path.join(curr, mongoBackupName)
+
+            # make a new directory
+            os.mkdir(path)
+
+            command = ["mongodump",  "--db", data[0], "--collection", data[1], "--out", path]
+
+            subprocess.run(command)
+
 
     # To restore backup
     def restore(self):
