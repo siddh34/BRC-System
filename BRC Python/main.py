@@ -18,6 +18,8 @@ from convertTableForm import convertFormUI
 
 from mongoBackupForm import mongoBackUpFormUI
 
+from RestoreMongoform import restoreMongoformUI
+
 import sys, os, pandas as pd, subprocess, datetime as dt, mysql.connector, boto3, json
 
 from bson import json_util
@@ -206,38 +208,70 @@ class UI(QMainWindow):
 
     # To restore backup
     def restore(self):
-        self.resForm = restoreFormUI()
-        self.resForm.my_signal.connect(self.recieveRestoreData)
+        if self.DatabaseDropDown.currentIndex() == 0:
+            self.resForm = restoreFormUI()
+            self.resForm.my_signal.connect(self.recieveRestoreData)
+        elif self.DatabaseDropDown.currentIndex() == 1:
+            self.resForm = restoreMongoformUI()
+            self.resForm.my_signal.connect(self.recieveRestoreData)
 
     # function to restore backup
     def recieveRestoreData(self,data):
-        print(data)
-        # Open the file dialog and set the options
-        options = QFileDialog.Options()
-        options |= QFileDialog.DontUseNativeDialog
-        options |= QFileDialog.ShowDirsOnly
-        options |= QFileDialog.DontResolveSymlinks
+        if self.DatabaseDropDown.currentIndex() == 0:
+            print(data)
+            # Open the file dialog and set the options
+            options = QFileDialog.Options()
+            options |= QFileDialog.DontUseNativeDialog
+            options |= QFileDialog.ShowDirsOnly
+            options |= QFileDialog.DontResolveSymlinks
 
-        # Set the file dialog properties
-        fileDialog = QFileDialog()
-        fileDialog.setFileMode(QFileDialog.AnyFile)
-        fileDialog.setNameFilter("SQL files (*.sql)")
-        fileDialog.setViewMode(QFileDialog.Detail)
+            # Set the file dialog properties
+            fileDialog = QFileDialog()
+            fileDialog.setFileMode(QFileDialog.AnyFile)
+            fileDialog.setNameFilter("SQL files (*.sql)")
+            fileDialog.setViewMode(QFileDialog.Detail)
 
-        # Open the file dialog and get the selected file path
-        if fileDialog.exec_() == QFileDialog.Accepted:
-            selected_file = fileDialog.selectedFiles()[0]
-            print("Selected file:", selected_file)
+            # Open the file dialog and get the selected file path
+            if fileDialog.exec_() == QFileDialog.Accepted:
+                selected_file = fileDialog.selectedFiles()[0]
+                print("Selected file:", selected_file)
 
-            # Run the command and capture the output
+                # Run the command and capture the output
 
-            result = subprocess.run(["mysql","-u","root",f"-p{data[1]}",f"{data[0]}",'-e', fr'SOURCE {selected_file}'], capture_output=True, text=True)
+                result = subprocess.run(["mysql","-u","root",f"-p{data[1]}",f"{data[0]}",'-e', fr'SOURCE {selected_file}'], capture_output=True, text=True)
 
-            print(result.stderr)
+                print(result.stderr)
 
-            print(result.stdout)
+                print(result.stdout)
 
-            print("Done!")
+                print("Done!")
+        elif self.DatabaseDropDown.currentIndex() == 1:
+            print(data)
+            # Open the file dialog and set the options
+            options = QFileDialog.Options()
+            options |= QFileDialog.DontUseNativeDialog
+            options |= QFileDialog.ShowDirsOnly
+            options |= QFileDialog.DontResolveSymlinks
+
+            # Set the file dialog properties
+            fileDialog = QFileDialog()
+            fileDialog.setFileMode(QFileDialog.Directory)  # Set the file mode to select directories
+            fileDialog.setViewMode(QFileDialog.Detail)
+            fileDialog.setViewMode(QFileDialog.Detail)
+
+            # Open the file dialog and get the selected file path
+            if fileDialog.exec_() == QFileDialog.Accepted:
+                selected_file = fileDialog.selectedFiles()[0]
+                print("Selected file:", selected_file)
+                selected_file = fr'"{selected_file}"'
+
+                command = fr"mongorestore --host {data[1]} --port {data[2]} --db {data[0]} {selected_file}"
+
+                try:
+                    subprocess.run(command, shell=True, check=True)
+                    print("MongoDB restore completed successfully!")
+                except subprocess.CalledProcessError as e:
+                    print(f"Error occurred during MongoDB restore: {e}")
 
     # Used for encryption
     def encrypt(self):
