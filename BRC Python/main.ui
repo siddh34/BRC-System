@@ -240,7 +240,7 @@
       <property name="geometry">
        <rect>
         <x>40</x>
-        <y>340</y>
+        <y>370</y>
         <width>731</width>
         <height>181</height>
        </rect>
@@ -302,7 +302,7 @@
       <property name="geometry">
        <rect>
         <x>40</x>
-        <y>190</y>
+        <y>220</y>
         <width>541</width>
         <height>87</height>
        </rect>
@@ -314,8 +314,8 @@
      <widget class="QPushButton" name="Query_2">
       <property name="geometry">
        <rect>
-        <x>590</x>
-        <y>190</y>
+        <x>600</x>
+        <y>220</y>
         <width>131</width>
         <height>91</height>
        </rect>
@@ -327,8 +327,8 @@
      <widget class="QLabel" name="QutputLabel_2">
       <property name="geometry">
        <rect>
-        <x>350</x>
-        <y>290</y>
+        <x>360</x>
+        <y>320</y>
         <width>71</width>
         <height>31</height>
        </rect>
@@ -391,6 +391,32 @@
       </property>
       <property name="text">
        <string>Select Database</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_2">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>190</y>
+        <width>541</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Note: For SQL Query, you can direct write the Queries</string>
+      </property>
+     </widget>
+     <widget class="QPlainTextEdit" name="QueryOutput2">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>380</y>
+        <width>711</width>
+        <height>161</height>
+       </rect>
+      </property>
+      <property name="plainText">
+       <string/>
       </property>
      </widget>
     </widget>

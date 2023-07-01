@@ -63,6 +63,7 @@ class UI(QMainWindow):
         self.submitButton = self.findChild(QPushButton,"SubmitButton")
         self.queryButton = self.findChild(QPushButton,"Query_2")
         self.QueryBox =  self.findChild(QPlainTextEdit,"QueryBox_2")
+        self.QueryOutputBox2 =  self.findChild(QPlainTextEdit,"QueryOutput2")
         self.output = self.findChild(QTableWidget,"Output_2")
 
         # Variable on page 3
@@ -73,6 +74,7 @@ class UI(QMainWindow):
         self.PreviewBox = self.findChild(QTextEdit,"PreviewBox")
         self.fields = self.findChild(QTextEdit,"schemaData")
         self.progressBar = self.findChild(QProgressBar,"progressBar")
+        self.screen2DropDown = self.findChild(QComboBox,"DatabaseSelectTab2")
 
         # Assigning functions to buttons
         self.selectFolder.clicked.connect(self.selectFolderAction)
@@ -96,6 +98,9 @@ class UI(QMainWindow):
 
         # variable for encryption
         self.Encryption_Selected_file = None
+
+        # hide some widgets on second screen
+        self.QueryOutputBox2.hide();
 
         self.show()
 
@@ -483,38 +488,41 @@ class UI(QMainWindow):
     # Query the database
     def query(self):
         msgBox = QMessageBox()
-        if self.hostName.text() == "" or self.password.text() == "" or self.database.text() == "" or self.userName.text() == "":
-            msgBox.setText("Please Enter the respective fields.")
-            msgBox.exec()
-        else:
-            try: 
-                mydatabase = mysql.connector.connect(
-                    host=f"{self.hostName.text()}",
-                    user=f"{self.userName.text()}",
-                    password=f"{self.password.text()}",
-                    database=f"{self.database.text()}"
-                )
-                cursor = self.QueryBox.textCursor()
-                cursor.select(QtGui.QTextCursor.BlockUnderCursor)
-                query = cursor.selectedText()
-
-                df = pd.read_sql_query(f'{query}', mydatabase)
-
-                # TODO: convert df to actual df to get a savable xlxs
-
-                self.output.setColumnCount(len(df.columns))
-                self.output.setRowCount(len(df))
-
-                headers = df.columns.tolist()
-                self.output.setHorizontalHeaderLabels(headers)
-
-                for i, row in enumerate(df.values):
-                    for j, value in enumerate(row):
-                        item = QTableWidgetItem(str(value))
-                        self.output.setItem(i, j, item)
-            except Exception as e:
-                msgBox.setText(f"{str(e)}")
+        if self.screen2DropDown.currentIndex() == 0:
+            if self.hostName.text() == "" or self.password.text() == "" or self.database.text() == "" or self.userName.text() == "":
+                msgBox.setText("Please Enter the respective fields.")
                 msgBox.exec()
+            else:
+                try: 
+                    mydatabase = mysql.connector.connect(
+                        host=f"{self.hostName.text()}",
+                        user=f"{self.userName.text()}",
+                        password=f"{self.password.text()}",
+                        database=f"{self.database.text()}"
+                    )
+                    cursor = self.QueryBox.textCursor()
+                    cursor.select(QtGui.QTextCursor.BlockUnderCursor)
+                    query = cursor.selectedText()
+
+                    df = pd.read_sql_query(f'{query}', mydatabase)
+
+                    # TODO: convert df to actual df to get a savable xlxs
+
+                    self.output.setColumnCount(len(df.columns))
+                    self.output.setRowCount(len(df))
+
+                    headers = df.columns.tolist()
+                    self.output.setHorizontalHeaderLabels(headers)
+
+                    for i, row in enumerate(df.values):
+                        for j, value in enumerate(row):
+                            item = QTableWidgetItem(str(value))
+                            self.output.setItem(i, j, item)
+                except Exception as e:
+                    msgBox.setText(f"{str(e)}")
+                    msgBox.exec()
+        elif self.screen2DropDown.currentIndex() == 1:
+            pass        
 
     # Uploads file to aws
     def uploadToAWSS3(self):
