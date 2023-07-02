@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="tab_8">
      <attribute name="title">
@@ -393,7 +393,7 @@
        <string>Select Database</string>
       </property>
      </widget>
-     <widget class="QLabel" name="label_2">
+     <widget class="QLabel" name="variableLabel">
       <property name="geometry">
        <rect>
         <x>40</x>
@@ -409,10 +409,10 @@
      <widget class="QPlainTextEdit" name="QueryOutput2">
       <property name="geometry">
        <rect>
-        <x>50</x>
-        <y>380</y>
-        <width>711</width>
-        <height>161</height>
+        <x>40</x>
+        <y>360</y>
+        <width>741</width>
+        <height>211</height>
        </rect>
       </property>
       <property name="plainText">

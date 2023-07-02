@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QMainWindow, QApplication, QPushButton, QComboBox, QTableWidget, QFileDialog, QLineEdit, QPlainTextEdit, QTextEdit, QFileDialog, QMessageBox, QTableWidgetItem, QProgressBar
+from PyQt5.QtWidgets import QMainWindow, QApplication, QPushButton, QComboBox, QTableWidget, QFileDialog, QLineEdit, QPlainTextEdit, QTextEdit, QFileDialog, QMessageBox, QTableWidgetItem, QProgressBar, QLabel
 
 from PyQt5 import uic
 
@@ -57,14 +57,20 @@ class UI(QMainWindow):
 
         # Variable on page 2
         self.hostName = self.findChild(QLineEdit,"hostLineEdit_2")
+        self.hostLabel = self.findChild(QLabel,"hostLabel_2")
         self.userName = self.findChild(QLineEdit,"userLineEdit_2")
+        self.userNameLabel = self.findChild(QLabel,"userLabel_2")
         self.password = self.findChild(QLineEdit,"passwordLineEdit_2")
+        self.passLabel = self.findChild(QLabel,"passwordLabel_2")
         self.database = self.findChild(QLineEdit,"databaseLineEdit_2")
+        self.dataLabel = self.findChild(QLabel,"databaseLabel_2")
         self.submitButton = self.findChild(QPushButton,"SubmitButton")
         self.queryButton = self.findChild(QPushButton,"Query_2")
         self.QueryBox =  self.findChild(QPlainTextEdit,"QueryBox_2")
         self.QueryOutputBox2 =  self.findChild(QPlainTextEdit,"QueryOutput2")
         self.output = self.findChild(QTableWidget,"Output_2")
+        self.changingLabel = self.findChild(QLabel,"variableLabel")
+        self.screen2DropDown = self.findChild(QComboBox,"DatabaseSelectTab2")
 
         # Variable on page 3
         self.ConvertButton = self.findChild(QPushButton,"Convert")
@@ -74,7 +80,7 @@ class UI(QMainWindow):
         self.PreviewBox = self.findChild(QTextEdit,"PreviewBox")
         self.fields = self.findChild(QTextEdit,"schemaData")
         self.progressBar = self.findChild(QProgressBar,"progressBar")
-        self.screen2DropDown = self.findChild(QComboBox,"DatabaseSelectTab2")
+        self.screen3DropDown = self.findChild(QComboBox,"DatabaseC_2")
 
         # Assigning functions to buttons
         self.selectFolder.clicked.connect(self.selectFolderAction)
@@ -88,6 +94,7 @@ class UI(QMainWindow):
         self.ConvertButton.clicked.connect(self.convertForm)
         self.previewButton.clicked.connect(self.previewConvert)
         self.saveButton.clicked.connect(self.saveConvert)
+        self.screen2DropDown.currentIndexChanged.connect(self.changeDataOnSecondScreen)
 
         # These variables are for QProgressBar
         # self.timer = QBasicTimer()
@@ -485,6 +492,41 @@ class UI(QMainWindow):
                 outText.append(eachLetter)
         return outText
 
+    # varies data according to dropdown on second screen
+    def changeDataOnSecondScreen(self):
+        if self.screen2DropDown.currentIndex() == 0:
+            self.changingLabel.setText("Note: For SQL Query, you can direct write the Queries")
+
+            # changing the labels
+            self.hostLabel.setText("Host")
+            self.userNameLabel.setText("User")
+            # Visible the feilds
+            self.password.setVisible(True)
+            self.database.setVisible(True)
+            self.dataLabel.setVisible(True)
+            self.passLabel.setVisible(True)
+            self.output.setVisible(True)
+
+            # hide the secondary output
+            self.QueryOutputBox2.hide()
+
+        elif self.screen2DropDown.currentIndex() == 1:
+            self.changingLabel.setText("Note: For mongo enter values {field, query} then press query")
+
+            # changing the labels
+            self.hostLabel.setText("Database")
+            self.userNameLabel.setText("Collection")
+
+            # hide some fields
+            self.password.hide()
+            self.database.hide()
+            self.dataLabel.hide()
+            self.passLabel.hide()
+            self.output.hide()
+
+            # visible output field
+            self.QueryOutputBox2.setVisible(True)
+
     # Query the database
     def query(self):
         msgBox = QMessageBox()
@@ -522,7 +564,36 @@ class UI(QMainWindow):
                     msgBox.setText(f"{str(e)}")
                     msgBox.exec()
         elif self.screen2DropDown.currentIndex() == 1:
-            pass        
+            # Establish a connection to MongoDB
+            client = MongoClient("mongodb://localhost:27017")
+            try:
+                # Access the database
+                if self.QueryBox.text() == "":
+                    # get all data
+                    pass
+                else:
+                    db = client[f"{self.hostName.text()}"]
+
+                    # Choose the collection to query
+                    collection = db[f"{self.userName.text()}"]
+
+                    pairs = self.QueryBox.text.split()
+
+                    # Define the query
+                    query = {f"{pairs[0]}": f"{pairs[1]}"}
+
+                    # Execute the query
+                    result = collection.find(query)
+
+                    print(result)
+
+                    # Process the query result
+                    for document in result:
+                        print(document)
+    
+            except Exception as e:
+                msgBox.setText(f"{str(e)}")
+                msgBox.exec()
 
     # Uploads file to aws
     def uploadToAWSS3(self):
