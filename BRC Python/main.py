@@ -566,21 +566,32 @@ class UI(QMainWindow):
         elif self.screen2DropDown.currentIndex() == 1:
             # Establish a connection to MongoDB
             client = MongoClient("mongodb://localhost:27017")
+
+            # handel query
+
+            cursor = self.QueryBox.textCursor()
+            cursor.select(QtGui.QTextCursor.BlockUnderCursor)
+            query = cursor.selectedText()
+
+            db = client[f"{self.hostName.text()}"]
+            # Choose the collection to query
+            collection = db[f"{self.userName.text()}"]
             try:
                 # Access the database
-                if self.QueryBox.text() == "":
+                if query == "":
                     # get all data
-                    pass
+                    result = collection.find()
+
+                    for document in result:
+                        print(document)
+                        # set text
+                        self.QueryOutputBox2.appendPlainText(f"{document}\n")
+
                 else:
-                    db = client[f"{self.hostName.text()}"]
 
-                    # Choose the collection to query
-                    collection = db[f"{self.userName.text()}"]
-
-                    pairs = self.QueryBox.text.split()
-
+                    pair = query.split()
                     # Define the query
-                    query = {f"{pairs[0]}": f"{pairs[1]}"}
+                    query = {f"{pair[0]}": f"{pair[1]}"}
 
                     # Execute the query
                     result = collection.find(query)
@@ -590,7 +601,9 @@ class UI(QMainWindow):
                     # Process the query result
                     for document in result:
                         print(document)
-    
+                        # set text
+                        self.QueryOutputBox2.appendPlainText(f"{document}\n")
+
             except Exception as e:
                 msgBox.setText(f"{str(e)}")
                 msgBox.exec()
