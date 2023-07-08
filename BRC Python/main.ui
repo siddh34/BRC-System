@@ -547,6 +547,16 @@
        <string>Enter you schema below ( use spaces in between )</string>
       </property>
      </widget>
+     <widget class="QTableWidget" name="convertSQLTable">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>460</y>
+        <width>711</width>
+        <height>121</height>
+       </rect>
+      </property>
+     </widget>
     </widget>
    </widget>
   </widget>

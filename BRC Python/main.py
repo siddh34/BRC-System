@@ -81,6 +81,7 @@ class UI(QMainWindow):
         self.fields = self.findChild(QTextEdit,"schemaData")
         self.progressBar = self.findChild(QProgressBar,"progressBar")
         self.screen3DropDown = self.findChild(QComboBox,"DatabaseC_2")
+        self.convertSQLTable = self.findChild(QTableWidget,"convertSQLTable")
 
         # Assigning functions to buttons
         self.selectFolder.clicked.connect(self.selectFolderAction)
@@ -107,7 +108,8 @@ class UI(QMainWindow):
         self.Encryption_Selected_file = None
 
         # hide some widgets on second screen
-        self.QueryOutputBox2.hide();
+        self.QueryOutputBox2.hide()
+        self.convertSQLTable.hide()
 
         self.show()
 
@@ -644,6 +646,7 @@ class UI(QMainWindow):
 
     # Convert function
     def convert(self,data):
+        msgBox = QMessageBox()
         # split the fields
         self.fieldsLines = self.fields.toPlainText().split(" ")
 
@@ -667,25 +670,71 @@ class UI(QMainWindow):
         mongo_db = mongo_client[f'{data[4]}']
         mongo_collection = mongo_db[f'{data[5]}']
 
-        # Retrieve data from the SQL table
         sql_cursor = sql_connection.cursor()
-        sql_cursor.execute(f'SELECT * FROM {data[6]}')
-        sql_data = sql_cursor.fetchall()
+        if self.screen3DropDown.currentIndex() == 0:
+            # Retrieve data from the SQL table
+            sql_cursor.execute(f'SELECT * FROM {data[6]}')
+            sql_data = sql_cursor.fetchall()
 
-        self.progressBar.setValue(45)
+            self.progressBar.setValue(45)
 
-        # Transform and insert data into MongoDB collection
-        j = 0
-        for row in sql_data:
-            doc = {}
-            j += 5
-            for i, myfield in enumerate(self.fieldsLines):
-                doc[myfield] = row[i]
-                self.progressBar.setValue(45 + j)
+            # Transform and insert data into MongoDB collection
+            j = 0
+            for row in sql_data:
+                doc = {}
+                j += 5
+                for i, myfield in enumerate(self.fieldsLines):
+                    doc[myfield] = row[i]
+                    self.progressBar.setValue(45 + j)
 
-            mongo_collection.insert_one(doc)
+                mongo_collection.insert_one(doc)
+        elif self.screen3DropDown.currentIndex() == 1:
+            # Retrieve data from the collection for the target fields
+            try:
+                mongo_documents = []
+                for field in self.fieldsLines:
+                    mongo_documents.extend(list(mongo_db[f'{data[5]}'].find({}, {field: 1})))
+
+                # Convert MongoDB documents to a list of dictionaries
+                document_list = [doc for doc in mongo_documents]
+
+                # Create a DataFrame from the list of dictionaries
+                data_frame = pd.DataFrame(document_list)
+
+                # Close the MongoDB connection
+                mongo_client.close()
+
+                # Create a cursor to execute SQL queries
+                cursor = sql_cursor
+
+                # Define the INSERT query
+                table_name = 'client'
+
+                df_filled = data_frame.fillna('')
+
+                self.progressBar.setValue(45)
+
+                for _, row in df_filled.iterrows():
+                    values = [row[column] if not pd.isnull(row[column]) else '' for column in self.fieldsLines]
+                    insert_query = f"INSERT IGNORE INTO {table_name} ({', '.join(self.fieldsLines)}) VALUES ({', '.join(['%s'] * len(self.fieldsLines))})"
+                    cursor.execute(insert_query, values)
+
+                # Commit the changes to the database
+                sql_connection.commit()
+
+                # Close the cursor and the database connection
+                sql_cursor.close()
+                sql_connection.close()
+                self.progressBar.setValue(80)
+            except Exception as e:
+                print("Error")
+
+                msgBox.setText(f"{str(e)}")
+                msgBox.exec()
 
         self.progressBar.setValue(100)
+
+        # self.progressBar.setValue(0)
 
     # Save Function for convert screen
     def saveConvert(self):
