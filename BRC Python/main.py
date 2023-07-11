@@ -82,6 +82,7 @@ class UI(QMainWindow):
         self.progressBar = self.findChild(QProgressBar,"progressBar")
         self.screen3DropDown = self.findChild(QComboBox,"DatabaseC_2")
         self.convertSQLTable = self.findChild(QTableWidget,"convertSQLTable")
+        # self.ConvertMongoTable = self.findChild(QTableWidget,"MongoToSQL")
 
         # Assigning functions to buttons
         self.selectFolder.clicked.connect(self.selectFolderAction)
@@ -96,6 +97,8 @@ class UI(QMainWindow):
         self.previewButton.clicked.connect(self.previewConvert)
         self.saveButton.clicked.connect(self.saveConvert)
         self.screen2DropDown.currentIndexChanged.connect(self.changeDataOnSecondScreen)
+        self.screen2DropDown.currentIndexChanged.connect(self.changeDataOnSecondScreen)
+        self.screen3DropDown.currentIndexChanged.connect(self.changeWidgetsOnThirdScreen)
 
         # These variables are for QProgressBar
         # self.timer = QBasicTimer()
@@ -110,6 +113,7 @@ class UI(QMainWindow):
         # hide some widgets on second screen
         self.QueryOutputBox2.hide()
         self.convertSQLTable.hide()
+        # self.ConvertMongoTable.hide()
 
         self.show()
 
@@ -593,6 +597,7 @@ class UI(QMainWindow):
 
                     pair = query.split()
                     # Define the query
+                    # TODO: Generate this randomly as if more pairs are their
                     query = {f"{pair[0]}": f"{pair[1]}"}
 
                     # Execute the query
@@ -728,50 +733,84 @@ class UI(QMainWindow):
                 self.progressBar.setValue(80)
             except Exception as e:
                 print("Error")
-
                 msgBox.setText(f"{str(e)}")
                 msgBox.exec()
 
         self.progressBar.setValue(100)
-
         # self.progressBar.setValue(0)
 
     # Save Function for convert screen
     def saveConvert(self):
         msgBox = QMessageBox()
         try:
-            # Connect to the MongoDB server
-            client = MongoClient('mongodb://localhost:27017/')
+            if self.screen3DropDown.currentIndex() == 0:
+                # Connect to the MongoDB server
+                # TODO: Rewap it efficiently
+                client = MongoClient('mongodb://localhost:27017/')
 
-            # Access the MongoDB database and collection
-            db = client[f'{self.dataList[4]}']
-            collection = db[f'{self.dataList[5]}']
+                # Access the MongoDB database and collection
+                db = client[f'{self.dataList[4]}']
+                collection = db[f'{self.dataList[5]}']
 
-            # Retrieve the documents from the collection
-            documents = collection.find()
+                # Retrieve the documents from the collection
+                documents = collection.find()
 
-            # Convert the documents to a list of dictionaries
-            document_list = [doc for doc in documents]
+                # Convert the documents to a list of dictionaries
+                document_list = [doc for doc in documents]
 
-            # Serialize the documents to JSON using json_util
-            json_data = json.dumps(document_list, default=json_util.default, indent=4)
+                # Serialize the documents to JSON using json_util
+                json_data = json.dumps(document_list, default=json_util.default, indent=4)
 
-            filepath = "output.json"
+                filepath = "output.json"
 
-            # Checking wether output file exists
-            if(os.path.isfile(filepath)):
-                i = 1
-                filepath = f"output{i}.json"
-                while(os.path.isfile(filepath)):
-                    i = i + 1
+                # Checking wether output file exists
+                if(os.path.isfile(filepath)):
+                    i = 1
                     filepath = f"output{i}.json"
+                    while(os.path.isfile(filepath)):
+                        i = i + 1
+                        filepath = f"output{i}.json"
 
-            # Save the JSON data to a file
-            with open(f'{filepath}', 'w') as file:
-                file.write(json_data)
+                # Save the JSON data to a file
+                with open(f'{filepath}', 'w') as file:
+                    file.write(json_data)
 
-            # Close the MongoDB connection
-            client.close()
+                # Close the MongoDB connection
+                client.close()
+            elif self.screen3DropDown.currentIndex() == 1:
+                if self.convertSQLTable.rowCount() != 0:
+                    rows = self.convertSQLTable.rowCount()
+                    columns = self.convertSQLTable.columnCount()
+
+                    data = []
+                    for row in range(rows):
+                        row_data = []
+                        for column in range(columns):
+                            item = self.convertSQLTable.item(row, column)
+                            if item is not None:
+                                row_data.append(item.text())
+                            else:
+                                row_data.append('')
+                        data.append(row_data)
+                    
+                    df = pd.DataFrame(data)
+
+                    # call ui to save files
+
+                    options = QFileDialog.Options()
+                    options |= QFileDialog.DontUseNativeDialog
+                    options |= QFileDialog.AnyFile
+
+                    file_path, _ = QFileDialog.getSaveFileName(None, "Save File", "", "Excel Files (*.xlsx)", options=options)
+
+                    print(file_path)
+
+                    try:
+                        df.to_excel(f"{file_path}.xlsx", index=False)
+                    except Exception as e:
+                        print(file_path)
+                        msgBox.setText(f"Something went wrong: {e.message}")
+                        msgBox.exec()
         except Exception as e:
             msgBox.setText(f"Please use convert first")
             msgBox.exec()
@@ -780,28 +819,64 @@ class UI(QMainWindow):
     def previewConvert(self):
         msgBox = QMessageBox()
         try:
-            client = MongoClient('mongodb://localhost:27017/')
+            if self.screen3DropDown.currentIndex() == 0:
+                client = MongoClient('mongodb://localhost:27017/')
 
-            # Access the MongoDB database and collection
-            db = client[f'{self.dataList[4]}']
-            collection = db[f'{self.dataList[5]}']
+                # Access the MongoDB database and collection
+                db = client[f'{self.dataList[4]}']
+                collection = db[f'{self.dataList[5]}']
 
-            # Retrieve the documents from the collection
-            documents = collection.find()
+                # Retrieve the documents from the collection
+                documents = collection.find()
 
-            # Convert the documents to a list of dictionaries
-            document_list = [doc for doc in documents]
+                # Convert the documents to a list of dictionaries
+                document_list = [doc for doc in documents]
 
-            # Serialize the documents to JSON using json_util
-            json_data = json.dumps(document_list, default=json_util.default, indent=4)
+                # Serialize the documents to JSON using json_util
+                json_data = json.dumps(document_list, default=json_util.default, indent=4)
 
-            self.PreviewBox.setPlainText(json_data)
+                self.PreviewBox.setPlainText(json_data)
 
-            # close connection
-            client.close()
+                # close connection
+                client.close()
+            elif self.screen3DropDown.currentIndex() == 1:
+                # connect db
+                mydatabase = mysql.connector.connect(
+                        host=f"{self.dataList[2]}",
+                        user=f"{self.dataList[3]}",
+                        password=f"{self.dataList[1]}",
+                        database=f"{self.dataList[0]}"
+                    )
+
+                # read data
+            
+                df = pd.read_sql_query(fr'SELECT * FROM {self.dataList[6]};', mydatabase)
+
+                # print(df)
+
+                self.convertSQLTable.setColumnCount(len(df.columns))
+                self.convertSQLTable.setRowCount(len(df))
+
+                headers = df.columns.tolist()
+                self.convertSQLTable.setHorizontalHeaderLabels(headers)
+
+                for i, row in enumerate(df.values):
+                    for j, value in enumerate(row):
+                        item = QTableWidgetItem(str(value))
+                        self.convertSQLTable.setItem(i, j, item)
+    
         except Exception as e:
             msgBox.setText(f"Please use convert first")
             msgBox.exec()
+
+    # changes widgets on third screen
+    def changeWidgetsOnThirdScreen(self):
+        if self.screen3DropDown.currentIndex() == 0:
+            self.PreviewBox.setVisible(True)
+            self.convertSQLTable.setVisible(False)
+        elif self.screen3DropDown.currentIndex() == 1:
+            self.PreviewBox.setVisible(False)
+            self.convertSQLTable.setVisible(True)
 
 if __name__ == '__main__':
     # initialize the app
