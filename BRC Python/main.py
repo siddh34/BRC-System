@@ -2,6 +2,8 @@ from PyQt5.QtWidgets import QMainWindow, QApplication, QPushButton, QComboBox, Q
 
 from PyQt5 import uic
 
+import shlex
+
 from PyQt5 import QtWidgets, QtGui
 
 from form import FormUI
@@ -203,9 +205,28 @@ class UI(QMainWindow):
                 backupName = f"sqlBackup_{dt.datetime.now().strftime('%Y-%m-%d')}.sql"
                 print(self.path)
                 print(f'{self.path+"/"}{backupName}')
+
+                outpath = f"{self.path}/{backupName}"
+
                 if self.path != None:
-                    res = subprocess.run(['mysqldump', '-u', 'root', f'-p{self.sqlUserPassword}', f'{self.sqlDatabaseName}', '>', f'{self.path+"/"}{backupName}'], capture_output=True, text=True, shell=True)
-                    print(res.stderr)
+
+                    mysqldump_command = [
+                        "mysqldump",
+                        "-u",
+                        "root",
+                        f'-p{self.sqlUserPassword}',
+                        "-d",
+                        f'{self.sqlDatabaseName}',
+                    ]
+
+                    with open(outpath, "w") as outfile:
+                        try:
+                            # Run the mysqldump command and redirect the output to the file
+                            res = subprocess.run(mysqldump_command, text=True, stdout=outfile)
+                            print("Database dump completed successfully.")
+                        except subprocess.CalledProcessError as e:
+                            print(f"Error occurred during database dump: {e}")
+
         elif self.DatabaseDropDown.currentIndex() == 1:
             print(data)
             # Get the path

@@ -92,7 +92,7 @@ CREATE TABLE `client` (
 
 LOCK TABLES `client` WRITE;
 /*!40000 ALTER TABLE `client` DISABLE KEYS */;
-INSERT INTO `client` VALUES (402,'FedEx',3),(403,'John Daliy Law, LLC',3),(404,'Scranton Whitepages',2),(405,'Times Newspaper',3),(406,'FedEx',2);
+INSERT INTO `client` VALUES (0,'',3),(402,'FedEx',3),(403,'John Daliy Law, LLC',3),(404,'Scranton Whitepages',2),(405,'Times Newspaper',3),(406,'FedEx',2);
 /*!40000 ALTER TABLE `client` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -279,4 +279,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-05-19  1:06:08
+-- Dump completed on 2023-07-12 13:42:36
