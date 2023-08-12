@@ -324,7 +324,7 @@ class UI(QMainWindow):
             # Set the file dialog properties
             fileDialog = QFileDialog()
             fileDialog.setFileMode(QFileDialog.AnyFile)
-            fileDialog.setNameFilter("SQL files (*.sql)")
+            fileDialog.setNameFilter("SQL/BSON files (*.sql, *.bson)")
             fileDialog.setViewMode(QFileDialog.Detail)
 
             # Open the file dialog and get the selected file path
@@ -434,7 +434,6 @@ class UI(QMainWindow):
             # Set the file dialog properties
             fileDialog = QFileDialog()
             fileDialog.setFileMode(QFileDialog.AnyFile)
-            fileDialog.setNameFilter("Text (*.txt)")
             fileDialog.setViewMode(QFileDialog.Detail)
 
             fileDialog2 = QFileDialog()
@@ -558,6 +557,7 @@ class UI(QMainWindow):
     def query(self):
         msgBox = QMessageBox()
         if self.screen2DropDown.currentIndex() == 0:
+            self.output.clearContents()
             if self.hostName.text() == "" or self.password.text() == "" or self.database.text() == "" or self.userName.text() == "":
                 msgBox.setText("Please Enter the respective fields.")
                 msgBox.exec()
@@ -591,6 +591,7 @@ class UI(QMainWindow):
                     msgBox.setText(f"{str(e)}")
                     msgBox.exec()
         elif self.screen2DropDown.currentIndex() == 1:
+            self.QueryOutputBox2.clear()
             # Establish a connection to MongoDB
             client = MongoClient("mongodb://localhost:27017")
 
@@ -841,6 +842,7 @@ class UI(QMainWindow):
         msgBox = QMessageBox()
         try:
             if self.screen3DropDown.currentIndex() == 0:
+                self.PreviewBox.clear()
                 client = MongoClient('mongodb://localhost:27017/')
 
                 # Access the MongoDB database and collection
@@ -861,6 +863,7 @@ class UI(QMainWindow):
                 # close connection
                 client.close()
             elif self.screen3DropDown.currentIndex() == 1:
+                self.convertSQLTable.clearContents()
                 # connect db
                 mydatabase = mysql.connector.connect(
                         host=f"{self.dataList[2]}",
