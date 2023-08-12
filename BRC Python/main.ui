@@ -251,8 +251,8 @@
        <rect>
         <x>40</x>
         <y>60</y>
-        <width>271</width>
-        <height>164</height>
+        <width>221</width>
+        <height>121</height>
        </rect>
       </property>
       <layout class="QFormLayout" name="formLayout_2">
@@ -396,9 +396,9 @@
      <widget class="QLabel" name="variableLabel">
       <property name="geometry">
        <rect>
-        <x>330</x>
-        <y>180</y>
-        <width>431</width>
+        <x>40</x>
+        <y>190</y>
+        <width>721</width>
         <height>21</height>
        </rect>
       </property>
@@ -555,6 +555,32 @@
         <width>711</width>
         <height>121</height>
        </rect>
+      </property>
+     </widget>
+     <widget class="Line" name="line">
+      <property name="geometry">
+       <rect>
+        <x>520</x>
+        <y>70</y>
+        <width>41</width>
+        <height>61</height>
+       </rect>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+     </widget>
+     <widget class="QLabel" name="FromTo">
+      <property name="geometry">
+       <rect>
+        <x>390</x>
+        <y>70</y>
+        <width>131</width>
+        <height>61</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>From SQL TO</string>
       </property>
      </widget>
     </widget>

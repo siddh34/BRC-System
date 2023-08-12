@@ -84,6 +84,7 @@ class UI(QMainWindow):
         self.progressBar = self.findChild(QProgressBar,"progressBar")
         self.screen3DropDown = self.findChild(QComboBox,"DatabaseC_2")
         self.convertSQLTable = self.findChild(QTableWidget,"convertSQLTable")
+        self.FromToText = self.findChild(QLabel,"FromTo")
         # self.ConvertMongoTable = self.findChild(QTableWidget,"MongoToSQL")
 
         # Assigning functions to buttons
@@ -896,9 +897,11 @@ class UI(QMainWindow):
     # changes widgets on third screen
     def changeWidgetsOnThirdScreen(self):
         if self.screen3DropDown.currentIndex() == 0:
+            self.FromToText.setText("From SQL to")
             self.PreviewBox.setVisible(True)
             self.convertSQLTable.setVisible(False)
         elif self.screen3DropDown.currentIndex() == 1:
+            self.FromToText.setText("From Mongo to")
             self.PreviewBox.setVisible(False)
             self.convertSQLTable.setVisible(True)
 
