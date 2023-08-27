@@ -15,7 +15,7 @@ class FormUI(QMainWindow):
         """Constructor use only when you have to add components to UI which also has to functional at the same time"""
         super(FormUI, self).__init__()
 
-        uic.loadUi("form.ui", self)
+        uic.loadUi("./design/form.ui", self)
 
         #variables 
         self.password = self.findChild(QLineEdit,"passwordLineEdit")

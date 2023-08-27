@@ -35,7 +35,7 @@ class UI(QMainWindow):
         """Constructor use only when you have to add components to UI which also has to functional at the same time"""
         super(UI, self).__init__()
 
-        uic.loadUi("main.ui", self)
+        uic.loadUi("./design/main.ui", self)
 
         # Path
         self.path = None

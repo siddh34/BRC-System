@@ -15,7 +15,7 @@ class restoreFormUI(QMainWindow):
         """Constructor use only when you have to add components to UI which also has to functional at the same time"""
         super(restoreFormUI, self).__init__()
 
-        uic.loadUi("Restoreform.ui", self)
+        uic.loadUi("./design/Restoreform.ui", self)
 
         #variables 
         self.password = self.findChild(QLineEdit,"passwordLineEdit")

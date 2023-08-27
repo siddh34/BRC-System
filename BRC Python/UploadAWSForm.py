@@ -15,7 +15,7 @@ class UploadAWSForm(QMainWindow):
         """Constructor use only when you have to add components to UI which also has to functional at the same time"""
         super(UploadAWSForm, self).__init__()
 
-        uic.loadUi("UploadAWSForm.ui", self)
+        uic.loadUi("./design/UploadAWSForm.ui", self)
 
         #variables 
         self.accessKey = self.findChild(QLineEdit,"accessKeyIDLineEdit")
