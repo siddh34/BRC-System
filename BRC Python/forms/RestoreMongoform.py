@@ -15,7 +15,11 @@ class restoreMongoformUI(QMainWindow):
         """Constructor use only when you have to add components to UI which also has to functional at the same time"""
         super(restoreMongoformUI, self).__init__()
 
-        uic.loadUi("../design/RestoreMongoform.ui", self)
+        # while running the main.py file
+        uic.loadUi("./design/RestoreMongoform.ui", self)
+
+        # while running the file itself
+        # uic.loadUi("../design/RestoreMongoform.ui", self)
 
         #variables 
         self.DatabaseName = self.findChild(QLineEdit,"DatabaseNameLineEdit")

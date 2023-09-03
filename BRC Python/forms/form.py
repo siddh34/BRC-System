@@ -5,8 +5,8 @@ from PyQt5.QtCore import pyqtSignal
 from PyQt5 import uic, QtGui
 
 from PyQt5 import QtWidgets
-
 import sys
+import os
 
 class FormUI(QMainWindow):
     my_signal = pyqtSignal(list)
@@ -15,7 +15,11 @@ class FormUI(QMainWindow):
         """Constructor use only when you have to add components to UI which also has to functional at the same time"""
         super(FormUI, self).__init__()
 
-        uic.loadUi("../design/form.ui", self)
+        # while running the main.py file
+        uic.loadUi("./design/form.ui", self)
+
+        # while running the file itself
+        # uic.loadUi("../design/form.ui", self)
 
         #variables 
         self.password = self.findChild(QLineEdit,"passwordLineEdit")

@@ -15,7 +15,11 @@ class mongoBackUpFormUI(QMainWindow):
         """Constructor use only when you have to add components to UI which also has to functional at the same time"""
         super(mongoBackUpFormUI, self).__init__()
 
-        uic.loadUi("../design/mongoBackupForm.ui", self)
+        # while running the main.py file
+        uic.loadUi("./design/mongoBackupForm.ui", self)
+
+        # while running the file itself
+        # uic.loadUi("../design/mongoBackupForm.ui", self)
 
         #variables 
         self.collections = self.findChild(QLineEdit,"CollectionLineEdit")
