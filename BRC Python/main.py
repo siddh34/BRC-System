@@ -2,13 +2,9 @@ from PyQt5.QtWidgets import QMainWindow, QApplication, QPushButton, QComboBox, Q
 
 from PyQt5 import uic
 
-import shlex
-
 from PyQt5 import QtWidgets, QtGui
 
 from form import FormUI
-
-# from PyQt5.QtCore import QBasicTimer
 
 from restoreForm import restoreFormUI
 
