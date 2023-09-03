@@ -4,19 +4,19 @@ from PyQt5 import uic
 
 from PyQt5 import QtWidgets, QtGui
 
-from form import FormUI
+from forms.form import FormUI
 
-from restoreForm import restoreFormUI
+from forms.restoreForm import restoreFormUI
 
-from UploadAWSForm import UploadAWSForm
+from forms.UploadAWSForm import UploadAWSForm
 
-from ceasarForm import ceasarFormUI
+from forms.ceasarForm import ceasarFormUI
 
-from convertTableForm import convertFormUI
+from forms.convertTableForm import convertFormUI
 
-from mongoBackupForm import mongoBackUpFormUI
+from forms.mongoBackupForm import mongoBackUpFormUI
 
-from RestoreMongoform import restoreMongoformUI
+from forms.RestoreMongoform import restoreMongoformUI
 
 import sys, os, pandas as pd, subprocess, datetime as dt, mysql.connector, boto3, json
 

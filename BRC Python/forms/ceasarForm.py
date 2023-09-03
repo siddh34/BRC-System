@@ -8,21 +8,19 @@ from PyQt5 import QtWidgets
 
 import sys
 
-class FormUI(QMainWindow):
+class ceasarFormUI(QMainWindow):
     my_signal = pyqtSignal(list)
 
     def __init__(self):
         """Constructor use only when you have to add components to UI which also has to functional at the same time"""
-        super(FormUI, self).__init__()
+        super(ceasarFormUI, self).__init__()
 
-        uic.loadUi("./design/form.ui", self)
+        uic.loadUi("../design/ceasarForm.ui", self)
 
         #variables 
-        self.password = self.findChild(QLineEdit,"passwordLineEdit")
-        self.Databasename = self.findChild(QLineEdit,"DatabaseNameLineEdit")
+        self.key = self.findChild(QLineEdit,"pass")
         self.submitButton = self.findChild(QPushButton,"Submit")
         self.exitButton = self.findChild(QPushButton,"Exit")
-        self.subClicked = False
 
         # Assigning the submit function to variable
         self.submitButton.clicked.connect(self.submit)
@@ -31,14 +29,12 @@ class FormUI(QMainWindow):
         self.show()
 
     def submit(self):
-        self.Databasename_2 = self.Databasename.text()
-        self.pas = self.password.text()
-        self.subClicked = True
-        self.my_signal.emit([self.Databasename_2,self.pas,self.subClicked])
+        self.keyText = self.key.text()
+        self.my_signal.emit([self.keyText])
 
 
 if __name__ == '__main__':
     # initialize the app
     app = QApplication(sys.argv)
-    UiWindow = FormUI()
+    UiWindow = ceasarFormUI()
     app.exec_()

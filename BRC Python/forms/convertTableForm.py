@@ -15,7 +15,7 @@ class convertFormUI(QMainWindow):
         """Constructor use only when you have to add components to UI which also has to functional at the same time"""
         super(convertFormUI, self).__init__()
 
-        uic.loadUi("./design/convertTable.ui", self)
+        uic.loadUi("../design/convertTable.ui", self)
 
         #variables 
         self.DatabaseName = self.findChild(QLineEdit,"DatabaseNameLineEdit")

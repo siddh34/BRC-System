@@ -8,18 +8,18 @@ from PyQt5 import QtWidgets
 
 import sys
 
-class mongoBackUpFormUI(QMainWindow):
+class FormUI(QMainWindow):
     my_signal = pyqtSignal(list)
 
     def __init__(self):
         """Constructor use only when you have to add components to UI which also has to functional at the same time"""
-        super(mongoBackUpFormUI, self).__init__()
+        super(FormUI, self).__init__()
 
-        uic.loadUi("./design/mongoBackupForm.ui", self)
+        uic.loadUi("../design/form.ui", self)
 
         #variables 
-        self.collections = self.findChild(QLineEdit,"CollectionLineEdit")
-        self.DatabaseName = self.findChild(QLineEdit,"DatabaseNameLineEdit")
+        self.password = self.findChild(QLineEdit,"passwordLineEdit")
+        self.Databasename = self.findChild(QLineEdit,"DatabaseNameLineEdit")
         self.submitButton = self.findChild(QPushButton,"Submit")
         self.exitButton = self.findChild(QPushButton,"Exit")
         self.subClicked = False
@@ -31,12 +31,14 @@ class mongoBackUpFormUI(QMainWindow):
         self.show()
 
     def submit(self):
-        self.DatabaseName_2 = self.DatabaseName.text()
-        self.col = self.collections.text()
-        self.my_signal.emit([self.DatabaseName_2,self.col])
+        self.Databasename_2 = self.Databasename.text()
+        self.pas = self.password.text()
+        self.subClicked = True
+        self.my_signal.emit([self.Databasename_2,self.pas,self.subClicked])
+
 
 if __name__ == '__main__':
     # initialize the app
     app = QApplication(sys.argv)
-    UiWindow = mongoBackUpFormUI()
+    UiWindow = FormUI()
     app.exec_()
