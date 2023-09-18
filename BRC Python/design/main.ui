@@ -230,6 +230,11 @@
         <string>Ceasar</string>
        </property>
       </item>
+      <item>
+       <property name="text">
+        <string>ECC</string>
+       </property>
+      </item>
      </widget>
     </widget>
     <widget class="QWidget" name="tab_11">
@@ -252,7 +257,7 @@
         <x>40</x>
         <y>60</y>
         <width>221</width>
-        <height>121</height>
+        <height>164</height>
        </rect>
       </property>
       <layout class="QFormLayout" name="formLayout_2">
