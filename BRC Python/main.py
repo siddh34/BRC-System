@@ -26,6 +26,10 @@ from cryptography.fernet import Fernet
 
 from pymongo import MongoClient
 
+from ecies import encrypt, decrypt
+
+from ecies.utils import generate_key
+
 class UI(QMainWindow):
     def __init__(self):
         """Constructor use only when you have to add components to UI which also has to functional at the same time"""
@@ -379,6 +383,50 @@ class UI(QMainWindow):
                 file_selected = fileDialog.selectedFiles()[0]
                 self.realFile = f"{file_selected}"
                 self.getKeyForm()
+        elif self.EncryptionDropDown.currentIndex() == 2:
+            # Open the file dialog and set the options
+            options = QFileDialog.Options()
+            options |= QFileDialog.DontUseNativeDialog
+            options |= QFileDialog.ShowDirsOnly
+            options |= QFileDialog.DontResolveSymlinks
+
+            # Set the file dialog properties
+            fileDialog = QFileDialog()
+            fileDialog.setFileMode(QFileDialog.AnyFile)
+            fileDialog.setViewMode(QFileDialog.Detail)
+
+            self.realFile = None
+            if fileDialog.exec_() == QFileDialog.Accepted:
+                file_selected = fileDialog.selectedFiles()[0]
+                self.realFile = f"{file_selected}"
+
+            if self.realFile == None:
+                msgBox = QMessageBox()
+                msgBox.setText("Please select a file")
+
+            # get text from file self.realFile
+            data = None
+            with open(self.realFile, "rb") as f:
+                data = f.read()
+            
+            if data == None:
+                msgBox = QMessageBox()
+                msgBox.setText("File may be an empty file")
+
+            key_pair = generate_key()
+            public_key = key_pair.public_key.format(True)
+            secret_key = key_pair.secret
+
+            with open("ecc.txt", "wb") as f:
+                f.write(b"Public Key:")
+                f.write(public_key)
+                f.write(b"Secret Key:")
+                f.write(secret_key)
+
+            encrypted = encrypt(public_key, data)
+
+            with open(self.realFile, "wb") as f:
+                f.write(encrypted)
 
     # Used for ceaesar encryption
     def caesar_encrypt(self,realText,step):
