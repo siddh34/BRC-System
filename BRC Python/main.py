@@ -568,7 +568,7 @@ class UI(QMainWindow):
 
             decrypted_data = decrypt(secret_key, encrypted_data)
 
-            with open("ecc_encrypted_data.txt", "wb") as f:
+            with open(self.realFile, "wb") as f:
                 f.write(decrypted_data)
             
     def getKeyFormDecrypt(self):
