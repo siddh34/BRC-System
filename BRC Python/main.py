@@ -384,6 +384,9 @@ class UI(QMainWindow):
                 self.realFile = f"{file_selected}"
                 self.getKeyForm()
         elif self.EncryptionDropDown.currentIndex() == 2:
+            msgBox = QMessageBox()
+            msgBox.setText("This generates ecc.txt file make sure that you have already decrypted the file which was first encrypted using this file or copy paste the ecc.txt into some other file and then continue")
+            msgBox.exec()
             # Open the file dialog and set the options
             options = QFileDialog.Options()
             options |= QFileDialog.DontUseNativeDialog
@@ -410,8 +413,8 @@ class UI(QMainWindow):
                 data = f.read()
             
             if data == None:
-                msgBox = QMessageBox()
                 msgBox.setText("File may be an empty file")
+                msgBox.exec()
 
             key_pair = generate_key()
             public_key = key_pair.public_key.format(True)
@@ -524,7 +527,50 @@ class UI(QMainWindow):
                 file_selected = fileDialog.selectedFiles()[0]
                 self.realFile = f"{file_selected}"
                 self.getKeyFormDecrypt()
+        elif self.EncryptionDropDown.currentIndex() == 2:
+            # Open the file dialog and set the options
+            options = QFileDialog.Options()
+            options |= QFileDialog.DontUseNativeDialog
+            options |= QFileDialog.ShowDirsOnly
+            options |= QFileDialog.DontResolveSymlinks
 
+            # Set the file dialog properties
+            fileDialog = QFileDialog()
+            fileDialog.setFileMode(QFileDialog.AnyFile)
+            fileDialog.setViewMode(QFileDialog.Detail)
+            
+            self.realFile = None
+            if fileDialog.exec_() == QFileDialog.Accepted:
+                file_selected = fileDialog.selectedFiles()[0]
+                self.realFile = f"{file_selected}"
+
+            # read from self.realFile
+
+            if self.realFile == None:
+                msgBox = QMessageBox()
+                msgBox.setText("Please select a file")
+                msgBox.exec()
+
+            encrypted_data = None
+
+            # get the encrypted data from file
+            with open(self.realFile, "rb") as f:
+                encrypted_data = f.read()
+
+            with open("ecc.txt", "rb") as f:
+                content = f.read()
+
+            secret_key = None
+            # Split the content by the "Secret Key:" label
+            parts = content.split(b"Secret Key:")
+            if len(parts) > 1:
+                secret_key = parts[1].strip()
+
+            decrypted_data = decrypt(secret_key, encrypted_data)
+
+            with open("ecc_encrypted_data.txt", "wb") as f:
+                f.write(decrypted_data)
+            
     def getKeyFormDecrypt(self):
         self.CeasarForm = ceasarFormUI()
         self.CeasarForm.my_signal.connect(self.getKeyDecrypt)
