@@ -648,6 +648,7 @@ class UI(QMainWindow):
                             if i % 2 == 0:
                                 query[pair[i]] = pair[i+1]
                                 i += 1
+                                print(query)
 
                     result = collection.find(query)
 
