@@ -113,15 +113,19 @@ class UI(QMainWindow):
         self.convertSQLTable.hide()
         # self.ConvertMongoTable.hide()
 
+        # create a msg box
+        self.msgBox = QMessageBox()
         try:
             subprocess.run(["mysqldump", "--version"], check=True)
         except FileNotFoundError:
-            print("MySQL not installed")
+            self.msgBox.setText("MySQL not installed!Please install MySQL")
+            self.msgBox.exec()
 
         try:
             subprocess.run(["mongo", "--version"], check=True)
         except FileNotFoundError:
-            print("MongoDB not installed")
+            self.msgBox.setText("Mongodb not installed!\nPlease install MongoDB and try again")
+            self.msgBox.exec()
 
         self.show()
 
@@ -352,9 +356,8 @@ class UI(QMainWindow):
                 self.realFile = f"{file_selected}"
                 self.getKeyForm()
         elif self.EncryptionDropDown.currentIndex() == 2:
-            msgBox = QMessageBox()
-            msgBox.setText("This generates ecc.txt file make sure that you have already decrypted the file which was first encrypted using this file or copy paste the ecc.txt into some other file and then continue")
-            msgBox.exec()
+            self.msgBox.setText("This generates ecc.txt file make sure that you have already decrypted the file which was first encrypted using this file or copy paste the ecc.txt into some other file and then continue")
+            self.msgBox.exec()
             options = QFileDialog.Options()
             options |= QFileDialog.DontUseNativeDialog
             options |= QFileDialog.ShowDirsOnly
@@ -370,16 +373,16 @@ class UI(QMainWindow):
                 self.realFile = f"{file_selected}"
 
             if self.realFile == None:
-                msgBox = QMessageBox()
-                msgBox.setText("Please select a file")
+                self.msgBox.setText("Please select a file")
+                self.msgBox.exec()
 
             data = None
             with open(self.realFile, "rb") as f:
                 data = f.read()
             
             if data == None:
-                msgBox.setText("File may be an empty file")
-                msgBox.exec()
+                self.msgBox.setText("File may be an empty file")
+                self.msgBox.exec()
 
             key_pair = generate_key()
             public_key = key_pair.public_key.format(True)
@@ -493,9 +496,8 @@ class UI(QMainWindow):
                 self.realFile = f"{file_selected}"
 
             if self.realFile == None:
-                msgBox = QMessageBox()
-                msgBox.setText("Please select a file")
-                msgBox.exec()
+                self.msgBox.setText("Please select a file")
+                self.msgBox.exec()
 
             encrypted_data = None
 
@@ -580,12 +582,11 @@ class UI(QMainWindow):
             self.QueryOutputBox2.setVisible(True)
 
     def query(self):
-        msgBox = QMessageBox()
         if self.screen2DropDown.currentIndex() == 0:
             self.output.clearContents()
             if self.hostName.text() == "" or self.password.text() == "" or self.database.text() == "" or self.userName.text() == "":
-                msgBox.setText("Please Enter the respective fields.")
-                msgBox.exec()
+                self.msgBox.setText("Please Enter the respective fields.")
+                self.msgBox.exec()
             else:
                 try: 
                     mydatabase = mysql.connector.connect(
@@ -613,8 +614,8 @@ class UI(QMainWindow):
                             item = QTableWidgetItem(str(value))
                             self.output.setItem(i, j, item)
                 except Exception as e:
-                    msgBox.setText(f"{str(e)}")
-                    msgBox.exec()
+                    self.msgBox.setText(f"{str(e)}")
+                    self.msgBox.exec()
         elif self.screen2DropDown.currentIndex() == 1:
             self.QueryOutputBox2.clear()
             client = MongoClient("mongodb://localhost:27017")
@@ -645,8 +646,8 @@ class UI(QMainWindow):
                         self.QueryOutputBox2.appendPlainText(f"{document}\n")
 
             except Exception as e:
-                msgBox.setText(f"{str(e)}")
-                msgBox.exec()
+                self.msgBox.setText(f"{str(e)}")
+                self.msgBox.exec()
 
     def uploadToAWSS3(self):
         self.AWS = UploadAWSForm()
@@ -677,7 +678,6 @@ class UI(QMainWindow):
         self.ConvertForm.my_signal.connect(self.convert)
 
     def convert(self,data):
-        msgBox = QMessageBox()
         self.fieldsLines = self.fields.toPlainText().split(" ")
 
         self.progressBar.setValue(10)
@@ -714,8 +714,8 @@ class UI(QMainWindow):
 
                 mongo_collection.insert_one(doc)
 
-                msgBox.setText(f"Data has been converted successfully")
-                msgBox.exec()
+                self.msgBox.setText(f"Data has been converted successfully")
+                self.msgBox.exec()
                 self.progressBar.setValue(0)
         elif self.screen3DropDown.currentIndex() == 1:
             try:
@@ -743,26 +743,25 @@ class UI(QMainWindow):
                     cursor.execute(insert_query, values)
 
                 sql_connection.commit()
-                msgBox.exec()
+                self.msgBox.exec()
                 sql_cursor.close()
                 sql_connection.close()
 
                 self.progressBar.setValue(80)
                 self.progressBar.setValue(100)
-                msgBox.setText(f"Data has been converted successfully")
-                msgBox.exec()
+                self.msgBox.setText(f"Data has been converted successfully")
+                self.msgBox.exec()
 
                 self.progressBar.setValue(0)
             except Exception as e:
-                msgBox.setText(f"{str(e)}")
-                msgBox.exec()
+                self.msgBox.setText(f"{str(e)}")
+                self.msgBox.exec()
 
         self.progressBar.setValue(100)
 
         self.progressBar.setValue(0)
 
     def saveConvert(self):
-        msgBox = QMessageBox()
         try:
             if self.screen3DropDown.currentIndex() == 0:
                 client = MongoClient('mongodb://localhost:27017/')
@@ -818,15 +817,14 @@ class UI(QMainWindow):
                     try:
                         df.to_excel(f"{file_path}.xlsx", index=False)
                     except Exception as e:
-                        print(file_path)
-                        msgBox.setText(f"Something went wrong: {e.message}")
-                        msgBox.exec()
+                        self.msgBox.setText(f"Something went wrong: {e.message}")
+                        self.msgBox.exec()
         except Exception as e:
-            msgBox.setText(f"Please use convert first")
-            msgBox.exec()
+            self.msgBox.setText(f"Please use convert first")
+            self.msgBox.exec()
 
     def previewConvert(self):
-        msgBox = QMessageBox()
+        self.msgBox = QMessageBox()
         try:
             if self.screen3DropDown.currentIndex() == 0:
                 self.PreviewBox.clear()
@@ -868,8 +866,8 @@ class UI(QMainWindow):
                         self.convertSQLTable.setItem(i, j, item)
     
         except Exception as e:
-            msgBox.setText(f"Please use convert first")
-            msgBox.exec()
+            self.msgBox.setText(f"Please use convert first")
+            self.msgBox.exec()
 
     def changeWidgetsOnThirdScreen(self):
         if self.screen3DropDown.currentIndex() == 0:
