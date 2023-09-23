@@ -103,24 +103,18 @@ class UI(QMainWindow):
         self.screen2DropDown.currentIndexChanged.connect(self.changeDataOnSecondScreen)
         self.screen3DropDown.currentIndexChanged.connect(self.changeWidgetsOnThirdScreen)
 
-        # These variables are for QProgressBar
-        # self.timer = QBasicTimer()
-        # self.step = 0
         self.progressBar.setMinimum(0)
         self.progressBar.setMaximum(100)
         self.progressBar.setValue(0)
 
-        # variable for encryption
         self.Encryption_Selected_file = None
 
-        # hide some widgets on second screen
         self.QueryOutputBox2.hide()
         self.convertSQLTable.hide()
         # self.ConvertMongoTable.hide()
 
         self.show()
 
-    # To show logs
     def displayLogs(self,directory):
         if self.DatabaseDropDown.currentIndex() == 0:
             sql_files = []
@@ -137,8 +131,6 @@ class UI(QMainWindow):
                             'size': size,
                             'modified': modified_str
                         })
-
-            # Updating the table
 
             self.logs.setRowCount(len(sql_files))
             row = 0
@@ -170,7 +162,6 @@ class UI(QMainWindow):
                 self.logs.setItem(row,2,QtWidgets.QTableWidgetItem(f"{data['modified']}"))
                 row = row + 1
 
-    # Provides us the folder in which backups will be stored
     def selectFolderAction(self):
         self.path = QFileDialog.getExistingDirectory(self, 'Select Folder')
 
@@ -180,7 +171,6 @@ class UI(QMainWindow):
         if self.path != None:
             self.displayLogs(self.path)
 
-    # To backup in specific directory
     def backup(self):
         if self.DatabaseDropDown.currentIndex() == 0:
             self.checkPressed = False
@@ -190,13 +180,11 @@ class UI(QMainWindow):
             self.form = mongoBackUpFormUI()
             self.form.my_signal.connect(self.receiveData)
 
-    # To recieve data from form for backup 
     def receiveData(self,data):
         if self.DatabaseDropDown.currentIndex() == 0:
             self.varList = data
             print(self.varList)
 
-            # taking username and password
             if(self.varList[2] == True):
                 self.sqlDatabaseName = self.varList[0]
                 self.sqlUserPassword = self.varList[1]
@@ -222,31 +210,24 @@ class UI(QMainWindow):
 
                     with open(outpath, "w") as outfile:
                         try:
-                            # Run the mysqldump command and redirect the output to the file
-                            res = subprocess.run(mysqldump_command, text=True, stdout=outfile)
+                            subprocess.run(mysqldump_command, text=True, stdout=outfile)
                             print("Database dump completed successfully.")
                         except subprocess.CalledProcessError as e:
                             print(f"Error occurred during database dump: {e}")
 
         elif self.DatabaseDropDown.currentIndex() == 1:
-            print(data)
-            # Get the path
             curr = QFileDialog.getExistingDirectory(self, 'Select Folder')
 
             mongoBackupName = f"mongoBackup_{dt.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
 
-            # Path
             path = os.path.join(curr, mongoBackupName)
 
-            # make a new directory
             os.mkdir(path)
 
             command = ["mongodump",  "--db", data[0], "--collection", data[1], "--out", path]
 
             subprocess.run(command)
 
-
-    # To restore backup
     def restore(self):
         if self.DatabaseDropDown.currentIndex() == 0:
             self.resForm = restoreFormUI()
@@ -259,24 +240,20 @@ class UI(QMainWindow):
     def recieveRestoreData(self,data):
         if self.DatabaseDropDown.currentIndex() == 0:
             print(data)
-            # Open the file dialog and set the options
             options = QFileDialog.Options()
             options |= QFileDialog.DontUseNativeDialog
             options |= QFileDialog.ShowDirsOnly
             options |= QFileDialog.DontResolveSymlinks
 
-            # Set the file dialog properties
             fileDialog = QFileDialog()
             fileDialog.setFileMode(QFileDialog.AnyFile)
             fileDialog.setNameFilter("SQL files (*.sql)")
             fileDialog.setViewMode(QFileDialog.Detail)
 
-            # Open the file dialog and get the selected file path
             if fileDialog.exec_() == QFileDialog.Accepted:
                 selected_file = fileDialog.selectedFiles()[0]
                 print("Selected file:", selected_file)
 
-                # Run the command and capture the output
 
                 result = subprocess.run(["mysql","-u","root",f"-p{data[1]}",f"{data[0]}",'-e', fr'SOURCE {selected_file}'], capture_output=True, text=True)
 
@@ -287,19 +264,16 @@ class UI(QMainWindow):
                 print("Done!")
         elif self.DatabaseDropDown.currentIndex() == 1:
             print(data)
-            # Open the file dialog and set the options
             options = QFileDialog.Options()
             options |= QFileDialog.DontUseNativeDialog
             options |= QFileDialog.ShowDirsOnly
             options |= QFileDialog.DontResolveSymlinks
 
-            # Set the file dialog properties
             fileDialog = QFileDialog()
-            fileDialog.setFileMode(QFileDialog.Directory)  # Set the file mode to select directories
+            fileDialog.setFileMode(QFileDialog.Directory)  
             fileDialog.setViewMode(QFileDialog.Detail)
             fileDialog.setViewMode(QFileDialog.Detail)
 
-            # Open the file dialog and get the selected file path
             if fileDialog.exec_() == QFileDialog.Accepted:
                 selected_file = fileDialog.selectedFiles()[0]
                 print("Selected file:", selected_file)
@@ -313,30 +287,24 @@ class UI(QMainWindow):
                 except subprocess.CalledProcessError as e:
                     print(f"Error occurred during MongoDB restore: {e}")
 
-    # Used for encryption
     def encrypt(self):
         if self.EncryptionDropDown.currentIndex() == 0:
-            # Open the file dialog and set the options
             options = QFileDialog.Options()
             options |= QFileDialog.DontUseNativeDialog
             options |= QFileDialog.ShowDirsOnly
             options |= QFileDialog.DontResolveSymlinks
 
-            # Set the file dialog properties
             fileDialog = QFileDialog()
             fileDialog.setFileMode(QFileDialog.AnyFile)
             fileDialog.setNameFilter("SQL/BSON files (*.sql, *.bson)")
             fileDialog.setViewMode(QFileDialog.Detail)
 
-            # Open the file dialog and get the selected file path
             if fileDialog.exec_() == QFileDialog.Accepted:
                 self.Encryption_Selected_file = fileDialog.selectedFiles()[0]
-                # Generate a random key
                 key = Fernet.generate_key()
 
                 filepath = "key.txt"
 
-                # Checking wether key.txt exists
                 if(os.path.isfile(filepath)):
                     i = 1
                     filepath = f"key{i}.txt"
@@ -344,41 +312,31 @@ class UI(QMainWindow):
                         i = i + 1
                         filepath = f"key{i}.txt"
 
-                # Save the key to a file
                 with open(filepath, "wb") as f:
                     f.write(key)
 
-                # Load the key from a file
                 with open(filepath, "rb") as f:
                     key = f.read()
 
-                # Create a Fernet object
                 fernet = Fernet(key)
 
-                # opening the original file to encrypt
                 with open(f'{self.Encryption_Selected_file}', 'rb') as file:
                     original = file.read()
 
-                # encrypting the file
                 encrypted = fernet.encrypt(original)
 
-                # opening the file in write mode and
-                # writing the encrypted data
                 with open(f'{self.Encryption_Selected_file}', 'wb') as encrypted_file:
                     encrypted_file.write(encrypted)
         elif self.EncryptionDropDown.currentIndex() == 1:
-            # Open the file dialog and set the options
             options = QFileDialog.Options()
             options |= QFileDialog.DontUseNativeDialog
             options |= QFileDialog.ShowDirsOnly
             options |= QFileDialog.DontResolveSymlinks
 
-            # Set the file dialog properties
             fileDialog = QFileDialog()
             fileDialog.setFileMode(QFileDialog.AnyFile)
             fileDialog.setViewMode(QFileDialog.Detail)
 
-            # Open the file dialog and get the selected file path
             if fileDialog.exec_() == QFileDialog.Accepted:
                 file_selected = fileDialog.selectedFiles()[0]
                 self.realFile = f"{file_selected}"
@@ -387,13 +345,11 @@ class UI(QMainWindow):
             msgBox = QMessageBox()
             msgBox.setText("This generates ecc.txt file make sure that you have already decrypted the file which was first encrypted using this file or copy paste the ecc.txt into some other file and then continue")
             msgBox.exec()
-            # Open the file dialog and set the options
             options = QFileDialog.Options()
             options |= QFileDialog.DontUseNativeDialog
             options |= QFileDialog.ShowDirsOnly
             options |= QFileDialog.DontResolveSymlinks
 
-            # Set the file dialog properties
             fileDialog = QFileDialog()
             fileDialog.setFileMode(QFileDialog.AnyFile)
             fileDialog.setViewMode(QFileDialog.Detail)
@@ -407,7 +363,6 @@ class UI(QMainWindow):
                 msgBox = QMessageBox()
                 msgBox.setText("Please select a file")
 
-            # get text from file self.realFile
             data = None
             with open(self.realFile, "rb") as f:
                 data = f.read()
@@ -431,7 +386,6 @@ class UI(QMainWindow):
             with open(self.realFile, "wb") as f:
                 f.write(encrypted)
 
-    # Used for ceaesar encryption
     def caesar_encrypt(self,realText,step):
         outText = []
         cryptText = []
@@ -454,12 +408,10 @@ class UI(QMainWindow):
                 outText.append(eachLetter)
         return outText
 
-    # Redirects To ceasear form
     def getKeyForm(self):
         self.CeasarForm = ceasarFormUI()
         self.CeasarForm.my_signal.connect(self.getKey)
 
-    # Does the encryption
     def getKey(self,data):
         step = data[0]
         with open(self.realFile, 'r') as f:
@@ -470,16 +422,13 @@ class UI(QMainWindow):
                 f.write(i)
         print("The Encrypted Message is saved in", self.realFile + ".encrypted")
 
-    # Used for decryption
     def decrypt(self):
         if self.EncryptionDropDown.currentIndex() == 0:
-            # Open the file dialog and set the options
             options = QFileDialog.Options()
             options |= QFileDialog.DontUseNativeDialog
             options |= QFileDialog.ShowDirsOnly
             options |= QFileDialog.DontResolveSymlinks
 
-            # Set the file dialog properties
             fileDialog = QFileDialog()
             fileDialog.setFileMode(QFileDialog.AnyFile)
             fileDialog.setViewMode(QFileDialog.Detail)
@@ -488,7 +437,6 @@ class UI(QMainWindow):
             fileDialog2.setFileMode(QFileDialog.AnyFile)
             fileDialog2.setViewMode(QFileDialog.Detail)
 
-            # Open the file dialog and get the selected file path
             if fileDialog.exec_() == QFileDialog.Accepted and fileDialog2.exec_() == QFileDialog.Accepted:
                 key_file = fileDialog.selectedFiles()[0]
                 encrypted_file = fileDialog2.selectedFiles()[0]
@@ -496,45 +444,35 @@ class UI(QMainWindow):
                 with open(f"{key_file}", "rb") as f:
                     key = f.read()
 
-                # Create a Fernet object
                 fernet = Fernet(key)
 
-                # opening the encrypted file
                 with open(f'{encrypted_file}', 'rb') as enc_file:
                     encrypted = enc_file.read()
 
-                # decrypting the file
                 decrypted = fernet.decrypt(encrypted)
 
-                # opening the file in write mode and
-                # writing the decrypted data
                 with open(f'{encrypted_file}', 'wb') as dec_file:
                     dec_file.write(decrypted)
         elif self.EncryptionDropDown.currentIndex() == 1:
-            # Open the file dialog and set the options
             options = QFileDialog.Options()
             options |= QFileDialog.DontUseNativeDialog
             options |= QFileDialog.ShowDirsOnly
             options |= QFileDialog.DontResolveSymlinks
 
-            # Set the file dialog properties
             fileDialog = QFileDialog()
             fileDialog.setFileMode(QFileDialog.AnyFile)
             fileDialog.setViewMode(QFileDialog.Detail)
 
-            # Open the file dialog and get the selected file path
             if fileDialog.exec_() == QFileDialog.Accepted:
                 file_selected = fileDialog.selectedFiles()[0]
                 self.realFile = f"{file_selected}"
                 self.getKeyFormDecrypt()
         elif self.EncryptionDropDown.currentIndex() == 2:
-            # Open the file dialog and set the options
             options = QFileDialog.Options()
             options |= QFileDialog.DontUseNativeDialog
             options |= QFileDialog.ShowDirsOnly
             options |= QFileDialog.DontResolveSymlinks
 
-            # Set the file dialog properties
             fileDialog = QFileDialog()
             fileDialog.setFileMode(QFileDialog.AnyFile)
             fileDialog.setViewMode(QFileDialog.Detail)
@@ -544,8 +482,6 @@ class UI(QMainWindow):
                 file_selected = fileDialog.selectedFiles()[0]
                 self.realFile = f"{file_selected}"
 
-            # read from self.realFile
-
             if self.realFile == None:
                 msgBox = QMessageBox()
                 msgBox.setText("Please select a file")
@@ -553,7 +489,6 @@ class UI(QMainWindow):
 
             encrypted_data = None
 
-            # get the encrypted data from file
             with open(self.realFile, "rb") as f:
                 encrypted_data = f.read()
 
@@ -561,7 +496,6 @@ class UI(QMainWindow):
                 content = f.read()
 
             secret_key = None
-            # Split the content by the "Secret Key:" label
             parts = content.split(b"Secret Key:")
             if len(parts) > 1:
                 secret_key = parts[1].strip()
@@ -575,7 +509,6 @@ class UI(QMainWindow):
         self.CeasarForm = ceasarFormUI()
         self.CeasarForm.my_signal.connect(self.getKeyDecrypt)
 
-    # Does the encryption
     def getKeyDecrypt(self,data):
         step = data[0]
         with open(self.realFile, 'r') as f:
@@ -586,7 +519,6 @@ class UI(QMainWindow):
                 f.write(i)
         print("The Decrypted Message is saved in", self.realFile + ".decrypted")
 
-    # Used for ceaesar decryption
     def caesar_decrypt(self,realText, step):
         outText = []
         cryptText = []
@@ -609,42 +541,34 @@ class UI(QMainWindow):
                 outText.append(eachLetter)
         return outText
 
-    # varies data according to dropdown on second screen
     def changeDataOnSecondScreen(self):
         if self.screen2DropDown.currentIndex() == 0:
             self.changingLabel.setText("Note: For SQL Query, you can direct write the Queries")
 
-            # changing the labels
             self.hostLabel.setText("Host")
             self.userNameLabel.setText("User")
-            # Visible the feilds
             self.password.setVisible(True)
             self.database.setVisible(True)
             self.dataLabel.setVisible(True)
             self.passLabel.setVisible(True)
             self.output.setVisible(True)
 
-            # hide the secondary output
             self.QueryOutputBox2.hide()
 
         elif self.screen2DropDown.currentIndex() == 1:
             self.changingLabel.setText("Note: For mongo enter values {field, query} then press query")
 
-            # changing the labels
             self.hostLabel.setText("Database")
             self.userNameLabel.setText("Collection")
 
-            # hide some fields
             self.password.hide()
             self.database.hide()
             self.dataLabel.hide()
             self.passLabel.hide()
             self.output.hide()
 
-            # visible output field
             self.QueryOutputBox2.setVisible(True)
 
-    # Query the database
     def query(self):
         msgBox = QMessageBox()
         if self.screen2DropDown.currentIndex() == 0:
@@ -683,73 +607,54 @@ class UI(QMainWindow):
                     msgBox.exec()
         elif self.screen2DropDown.currentIndex() == 1:
             self.QueryOutputBox2.clear()
-            # Establish a connection to MongoDB
             client = MongoClient("mongodb://localhost:27017")
-
-            # handel query
-
             cursor = self.QueryBox.textCursor()
             cursor.select(QtGui.QTextCursor.BlockUnderCursor)
             query = cursor.selectedText()
 
             db = client[f"{self.hostName.text()}"]
-            # Choose the collection to query
             collection = db[f"{self.userName.text()}"]
             try:
-                # Access the database
                 if query == "":
-                    # get all data
                     result = collection.find()
 
                     for document in result:
                         print(document)
-                        # set text
                         self.QueryOutputBox2.appendPlainText(f"{document}\n")
-
                 else:
-
                     pair = query.split()
-                    # Define the query
                     # TODO: Generate this randomly as if more pairs are their
                     query = {f"{pair[0]}": f"{pair[1]}"}
 
-                    # Execute the query
                     result = collection.find(query)
 
                     print(result)
 
-                    # Process the query result
                     for document in result:
                         print(document)
-                        # set text
                         self.QueryOutputBox2.appendPlainText(f"{document}\n")
 
             except Exception as e:
                 msgBox.setText(f"{str(e)}")
                 msgBox.exec()
 
-    # Uploads file to aws
     def uploadToAWSS3(self):
         self.AWS = UploadAWSForm()
         self.AWS.my_signal.connect(self.receiveToUploadAWS)
 
-    # Recieve information for uploading to S3
     def receiveToUploadAWS(self,data):
         print(data)
         ACCESS_KEY_ID = f"{data[0]}"
         SECRET_ACCESS_KEY = f"{data[1]}"
 
-        # Create a Boto3 client
         s3 = boto3.client("s3", aws_access_key_id=ACCESS_KEY_ID, aws_secret_access_key=SECRET_ACCESS_KEY)
 
-        # Upload a file to S3
         file_path = fr"{data[2]}"
         bucket_name = f"{data[3]}"
         object_key = f"backupsql_{dt.datetime.now().strftime('%Y-%m-%d')}"
 
         s3.upload_file(file_path, bucket_name, object_key)
 
-        # Check if the file is uploaded successfully
         response = s3.head_object(Bucket=bucket_name, Key=object_key)
 
         if response["ResponseMetadata"]["HTTPStatusCode"] == 200:
@@ -757,23 +662,18 @@ class UI(QMainWindow):
         else:
             print("File upload failed")
 
-    # pulls out the convert form
     def convertForm(self):
         self.ConvertForm = convertFormUI()
         self.ConvertForm.my_signal.connect(self.convert)
 
-    # Convert function
     def convert(self,data):
         msgBox = QMessageBox()
-        # split the fields
         self.fieldsLines = self.fields.toPlainText().split(" ")
 
         self.progressBar.setValue(10)
 
-        # saving the datalist
         self.dataList = data
 
-        # Connect to the SQL database
         sql_connection = mysql.connector.connect(
             host=f'{data[2]}',
             user=f'{data[3]}',
@@ -783,20 +683,17 @@ class UI(QMainWindow):
 
         self.progressBar.setValue(20)
 
-        # Connect to the MongoDB database
         mongo_client = MongoClient('mongodb://localhost:27017/')
         mongo_db = mongo_client[f'{data[4]}']
         mongo_collection = mongo_db[f'{data[5]}']
 
         sql_cursor = sql_connection.cursor()
         if self.screen3DropDown.currentIndex() == 0:
-            # Retrieve data from the SQL table
             sql_cursor.execute(f'SELECT * FROM {data[6]}')
             sql_data = sql_cursor.fetchall()
 
             self.progressBar.setValue(45)
 
-            # Transform and insert data into MongoDB collection
             j = 0
             for row in sql_data:
                 doc = {}
@@ -806,26 +703,24 @@ class UI(QMainWindow):
                     self.progressBar.setValue(45 + j)
 
                 mongo_collection.insert_one(doc)
+
+                msgBox.setText(f"Data has been converted successfully")
+                msgBox.exec()
+                self.progressBar.setValue(0)
         elif self.screen3DropDown.currentIndex() == 1:
-            # Retrieve data from the collection for the target fields
             try:
                 mongo_documents = []
                 for field in self.fieldsLines:
                     mongo_documents.extend(list(mongo_db[f'{data[5]}'].find({}, {field: 1})))
 
-                # Convert MongoDB documents to a list of dictionaries
                 document_list = [doc for doc in mongo_documents]
 
-                # Create a DataFrame from the list of dictionaries
                 data_frame = pd.DataFrame(document_list)
 
-                # Close the MongoDB connection
                 mongo_client.close()
 
-                # Create a cursor to execute SQL queries
                 cursor = sql_cursor
 
-                # Define the INSERT query
                 table_name = 'client'
 
                 df_filled = data_frame.fillna('')
@@ -837,46 +732,42 @@ class UI(QMainWindow):
                     insert_query = f"INSERT IGNORE INTO {table_name} ({', '.join(self.fieldsLines)}) VALUES ({', '.join(['%s'] * len(self.fieldsLines))})"
                     cursor.execute(insert_query, values)
 
-                # Commit the changes to the database
                 sql_connection.commit()
-
-                # Close the cursor and the database connection
+                msgBox.exec()
                 sql_cursor.close()
                 sql_connection.close()
+
                 self.progressBar.setValue(80)
+                self.progressBar.setValue(100)
+                msgBox.setText(f"Data has been converted successfully")
+                msgBox.exec()
+
+                self.progressBar.setValue(0)
             except Exception as e:
-                print("Error")
                 msgBox.setText(f"{str(e)}")
                 msgBox.exec()
 
         self.progressBar.setValue(100)
-        # self.progressBar.setValue(0)
 
-    # Save Function for convert screen
+        self.progressBar.setValue(0)
+
     def saveConvert(self):
         msgBox = QMessageBox()
         try:
             if self.screen3DropDown.currentIndex() == 0:
-                # Connect to the MongoDB server
-                # TODO: Rewap it efficiently
                 client = MongoClient('mongodb://localhost:27017/')
 
-                # Access the MongoDB database and collection
                 db = client[f'{self.dataList[4]}']
                 collection = db[f'{self.dataList[5]}']
 
-                # Retrieve the documents from the collection
                 documents = collection.find()
 
-                # Convert the documents to a list of dictionaries
                 document_list = [doc for doc in documents]
 
-                # Serialize the documents to JSON using json_util
                 json_data = json.dumps(document_list, default=json_util.default, indent=4)
 
                 filepath = "output.json"
 
-                # Checking wether output file exists
                 if(os.path.isfile(filepath)):
                     i = 1
                     filepath = f"output{i}.json"
@@ -884,11 +775,9 @@ class UI(QMainWindow):
                         i = i + 1
                         filepath = f"output{i}.json"
 
-                # Save the JSON data to a file
                 with open(f'{filepath}', 'w') as file:
                     file.write(json_data)
 
-                # Close the MongoDB connection
                 client.close()
             elif self.screen3DropDown.currentIndex() == 1:
                 if self.convertSQLTable.rowCount() != 0:
@@ -908,8 +797,6 @@ class UI(QMainWindow):
                     
                     df = pd.DataFrame(data)
 
-                    # call ui to save files
-
                     options = QFileDialog.Options()
                     options |= QFileDialog.DontUseNativeDialog
                     options |= QFileDialog.AnyFile
@@ -928,7 +815,6 @@ class UI(QMainWindow):
             msgBox.setText(f"Please use convert first")
             msgBox.exec()
 
-    # Preview Function for convert screen
     def previewConvert(self):
         msgBox = QMessageBox()
         try:
@@ -936,26 +822,21 @@ class UI(QMainWindow):
                 self.PreviewBox.clear()
                 client = MongoClient('mongodb://localhost:27017/')
 
-                # Access the MongoDB database and collection
                 db = client[f'{self.dataList[4]}']
                 collection = db[f'{self.dataList[5]}']
 
-                # Retrieve the documents from the collection
                 documents = collection.find()
 
-                # Convert the documents to a list of dictionaries
                 document_list = [doc for doc in documents]
 
-                # Serialize the documents to JSON using json_util
                 json_data = json.dumps(document_list, default=json_util.default, indent=4)
 
                 self.PreviewBox.setPlainText(json_data)
 
-                # close connection
                 client.close()
             elif self.screen3DropDown.currentIndex() == 1:
                 self.convertSQLTable.clearContents()
-                # connect db
+
                 mydatabase = mysql.connector.connect(
                         host=f"{self.dataList[2]}",
                         user=f"{self.dataList[3]}",
@@ -963,11 +844,7 @@ class UI(QMainWindow):
                         database=f"{self.dataList[0]}"
                     )
 
-                # read data
-            
                 df = pd.read_sql_query(fr'SELECT * FROM {self.dataList[6]};', mydatabase)
-
-                # print(df)
 
                 self.convertSQLTable.setColumnCount(len(df.columns))
                 self.convertSQLTable.setRowCount(len(df))
@@ -984,7 +861,6 @@ class UI(QMainWindow):
             msgBox.setText(f"Please use convert first")
             msgBox.exec()
 
-    # changes widgets on third screen
     def changeWidgetsOnThirdScreen(self):
         if self.screen3DropDown.currentIndex() == 0:
             self.FromToText.setText("From SQL to")
