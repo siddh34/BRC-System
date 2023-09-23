@@ -641,7 +641,7 @@ class UI(QMainWindow):
                 else:
                     pair = query.split()
                     if pair.__len__() == 2:
-                        query = {f"{pair[0]}": f"{pair[1]}"}
+                        query = {f"{pair[0]}": pair[1]}
                     else:
                         query = {}
                         for i in range(0,len(pair)):
