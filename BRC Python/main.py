@@ -442,6 +442,7 @@ class UI(QMainWindow):
 
     def decrypt(self):
         if self.EncryptionDropDown.currentIndex() == 0:
+            self.msgBox.setText("Please select the key file and the encrypted file respectively")
             options = QFileDialog.Options()
             options |= QFileDialog.DontUseNativeDialog
             options |= QFileDialog.ShowDirsOnly
@@ -639,8 +640,14 @@ class UI(QMainWindow):
                         self.QueryOutputBox2.appendPlainText(f"{document}\n")
                 else:
                     pair = query.split()
-                    # TODO: Generate this randomly as if more pairs are their
-                    query = {f"{pair[0]}": f"{pair[1]}"}
+                    if pair.__len__() != 2:
+                        query = {f"{pair[0]}": f"{pair[1]}"}
+                    else:
+                        query = {}
+                        for i in range(0,len(pair)):
+                            if i % 2 == 0:
+                                query[pair[i]] = pair[i+1]
+                                i += 1
 
                     result = collection.find(query)
 
