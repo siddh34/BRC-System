@@ -640,7 +640,7 @@ class UI(QMainWindow):
                         self.QueryOutputBox2.appendPlainText(f"{document}\n")
                 else:
                     pair = query.split()
-                    if pair.__len__() != 2:
+                    if pair.__len__() == 2:
                         query = {f"{pair[0]}": f"{pair[1]}"}
                     else:
                         query = {}
