@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Upload To AWS</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QPushButton" name="Submit">
@@ -46,7 +46,7 @@
       <x>30</x>
       <y>10</y>
       <width>241</width>
-      <height>121</height>
+      <height>170</height>
      </rect>
     </property>
     <layout class="QFormLayout" name="formLayout">

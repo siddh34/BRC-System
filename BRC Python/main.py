@@ -113,8 +113,8 @@ class UI(QMainWindow):
         self.convertSQLTable.hide()
         # self.ConvertMongoTable.hide()
 
-        # create a msg box
         self.msgBox = QMessageBox()
+        self.msgBox.setWindowTitle("Message")
         try:
             subprocess.run(["mysqldump", "--version"], check=True)
         except FileNotFoundError:
@@ -186,6 +186,11 @@ class UI(QMainWindow):
             self.displayLogs(self.path)
 
     def backup(self):
+        if self.path == None:
+            self.msgBox.setText("Please select a folder")
+            self.msgBox.exec()
+            return
+
         if self.DatabaseDropDown.currentIndex() == 0:
             self.checkPressed = False
             self.form = FormUI()
@@ -824,7 +829,6 @@ class UI(QMainWindow):
             self.msgBox.exec()
 
     def previewConvert(self):
-        self.msgBox = QMessageBox()
         try:
             if self.screen3DropDown.currentIndex() == 0:
                 self.PreviewBox.clear()

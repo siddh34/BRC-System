@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Mongo Restore</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QWidget" name="formLayoutWidget">
@@ -20,7 +20,7 @@
       <x>20</x>
       <y>20</y>
       <width>261</width>
-      <height>108</height>
+      <height>122</height>
      </rect>
     </property>
     <layout class="QFormLayout" name="formLayout">
