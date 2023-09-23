@@ -113,6 +113,16 @@ class UI(QMainWindow):
         self.convertSQLTable.hide()
         # self.ConvertMongoTable.hide()
 
+        try:
+            subprocess.run(["mysqldump", "--version"], check=True)
+        except FileNotFoundError:
+            print("MySQL not installed")
+
+        try:
+            subprocess.run(["mongo", "--version"], check=True)
+        except FileNotFoundError:
+            print("MongoDB not installed")
+
         self.show()
 
     def displayLogs(self,directory):
